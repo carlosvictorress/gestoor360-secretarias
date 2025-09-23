@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Editar' if item else 'Adicionar' }} Item Patrimonial{% endblock %}
+
+{% block content %}
+<h2>{{ 'Editar' if item else 'Adicionar' }} Item Patrimonial</h2>
+<hr>
+
+<form method="POST">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3 text-muted">Dados do Item</h5>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="numero_patrimonio" class="form-label">Nº Patrimônio (Tombamento)*</label>
+                    <input type="text" class="form-control" name="numero_patrimonio" id="numero_patrimonio" value="{{ item.numero_patrimonio if item else '' }}" required {{ 'readonly' if item }}>
+                    {% if item %}
+                    <small class="form-text text-muted">O número de patrimônio não pode ser alterado.</small>
+                    {% endif %}
+                </div>
+                <div class="col-md-8">
+                    <label for="descricao" class="form-label">Descrição Completa do Item*</label>
+                    <input type="text" class="form-control" name="descricao" id="descricao" value="{{ item.descricao if item else '' }}" required>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                 <div class="col-md-6">
+                    <label for="categoria" class="form-label">Categoria</label>
+                    <input type="text" class="form-control" name="categoria" id="categoria" value="{{ item.categoria if item else '' }}" placeholder="Ex: Móveis, Eletrônicos, Veículos">
+                </div>
+                <div class="col-md-6">
+                    <label for="status" class="form-label">Status*</label>
+                    <select class="form-select" name="status" id="status" required>
+                        <option value="Ativo" {{ 'selected' if item and item.status == 'Ativo' }}>Ativo</option>
+                        <option value="Manutenção" {{ 'selected' if item and item.status == 'Manutenção' }}>Em Manutenção</option>
+                        <option value="Baixado" {{ 'selected' if item and item.status == 'Baixado' }}>Baixado (Inativo)</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr>
+            <h5 class="mb-3 text-muted">Dados de Aquisição e Localização</h5>
+
+            <div class="row mb-3">
+                 <div class="col-md-4">
+                    <label for="data_aquisicao" class="form-label">Data de Aquisição</label>
+                    <input type="date" class="form-control" name="data_aquisicao" id="data_aquisicao" value="{{ item.data_aquisicao.strftime('%Y-%m-%d') if item and item.data_aquisicao else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="valor_aquisicao" class="form-label">Valor de Aquisição (R$)</label>
+                    <input type="text" class="form-control" name="valor_aquisicao" id="valor_aquisicao" value="{{ '%.2f'|format(item.valor_aquisicao)|replace('.', ',') if item and item.valor_aquisicao else '' }}">
+                </div>
+            </div>
+            
+            {% if not item %} <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="localizacao" class="form-label">Localização Inicial*</label>
+                    <input type="text" class="form-control" name="localizacao" id="localizacao" required placeholder="Ex: SEMED - Almoxarifado">
+                </div>
+                <div class="col-md-6">
+                    <label for="servidor_responsavel_cpf" class="form-label">Responsável Inicial (Opcional)</label>
+                    <select class="form-select" name="servidor_responsavel_cpf" id="servidor_responsavel_cpf">
+                        <option value="">-- Sem responsável específico --</option>
+                        {% for s in servidores %}
+                        <option value="{{ s.cpf }}">{{ s.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label for="observacoes" class="form-label">Observações</label>
+                    <textarea class="form-control" name="observacoes" id="observacoes" rows="3">{{ item.observacoes if item else '' }}</textarea>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-footer text-end">
+            <a href="{{ url_for('patrimonio.listar_itens') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle-fill"></i> Salvar Item</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

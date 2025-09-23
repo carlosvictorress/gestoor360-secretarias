@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Guias de Atendimento Médico (GAM){% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Guias de Atendimento Médico (GAM)</h2>
+    <a href="{{ url_for('criar_gam') }}" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Nova Guia</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Servidor</th>
+                    <th>Matrícula</th>
+                    <th>Data de Emissão</th>
+                    <th>Status</th>
+                    <th class="text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guia in gams %}
+                <tr>
+                    <td>{{ guia.id }}</td>
+                    <td>{{ guia.servidor.nome }}</td>
+                    <td>{{ guia.servidor_num_contrato }}</td>
+                    <td>{{ guia.data_emissao.strftime('%d/%m/%Y') }}</td>
+                    <td>
+                        <span class="badge bg-info">{{ guia.status }}</span>
+                    </td>
+                    <td class="text-right">
+                        <a href="{{ url_for('imprimir_gam', gam_id=guia.id) }}" class="btn btn-sm btn-success" title="Imprimir/Visualizar" target="_blank"><i class="fas fa-print"></i>Imprimir</a>
+                        <a href="{{ url_for('editar_gam', gam_id=guia.id) }}" class="btn btn-sm btn-secondary" title="Editar"><i class="fas fa-pencil-alt"></i>Editar</a>
+                        <a href="{{ url_for('excluir_gam', gam_id=guia.id) }}" class="btn btn-sm btn-danger" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir esta guia?');"><i class="fas fa-trash"></i>Excluir</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">Nenhuma Guia de Atendimento encontrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciamento de Backups{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-database-down"></i> Gerenciamento de Backups</h2>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Gerar Novo Backup</h5>
+        <p class="card-text">
+            Clique no botão abaixo para gerar um backup completo do sistema.
+            Isso irá salvar uma cópia de segurança de todos os dados (servidores, escolas, pontos, etc.)
+            e de todos os arquivos de upload (fotos e documentos).
+        </p>
+        <a href="{{ url_for('backup.gerar_backup') }}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Gerar Novo Backup Completo
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">Backups Disponíveis</h5>
+    </div>
+    <div class="card-body">
+        {% if backups %}
+            <ul class="list-group list-group-flush">
+                {% for backup_file in backups %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="bi bi-file-earmark-zip-fill"></i>
+                        {{ backup_file }}
+                    </span>
+                    <a href="{{ url_for('backup.download_backup', filename=backup_file) }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-download"></i> Download
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-center text-muted">Nenhum backup encontrado.</p>
+        {% endif %}
+    </div>
+</div>
+<div class="card border-warning shadow-sm mb-4">
+    <div class="card-header bg-warning">
+        <h5 class="mb-0"><i class="bi bi-upload"></i> Restaurar a partir de um arquivo</h5>
+    </div>
+    <div class="card-body">
+        <p>Se você possui um arquivo <code>.zip</code> de backup, pode enviá-lo para o servidor por aqui.</p>
+        <form action="{{ url_for('backup.upload_backup') }}" method="POST" enctype="multipart/form-data">
+            <div class="input-group">
+                <input type="file" class="form-control" name="backup_file" id="backup_file" required accept=".zip">
+                <button class="btn btn-primary" type="submit">Enviar Arquivo</button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}

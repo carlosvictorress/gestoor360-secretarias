@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Editar Requerimento{% endblock %}
+
+{% block content %}
+<h2>Editar Requerimento #{{ requerimento.id }}</h2>
+<p class="text-muted">Altere os dados do requerimento abaixo conforme necessário.</p>
+
+<form method="POST" action="{{ url_for('editar_requerimento', req_id=requerimento.id) }}" class="mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5>1. Identificação do Servidor (Não editável)</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">CPF do Servidor</label>
+                    <input type="text" class="form-control" value="{{ requerimento.servidor_cpf }}" readonly>
+                </div>
+                <div class="col-md-8">
+                    <label for="autoridade_dirigida" class="form-label">Autoridade a quem é dirigida*</label>
+                    <input type="text" class="form-control" id="autoridade_dirigida" name="autoridade_dirigida" value="{{ requerimento.autoridade_dirigida }}" required>
+                </div>
+            </div>
+             <div class="row mb-3">
+                <div class="col-md-12"><label>Nome Completo:</label><input type="text" value="{{ requerimento.servidor.nome }}" class="form-control" readonly></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header">
+            <h5>2. Detalhes do Requerimento</h5>
+        </div>
+        <div class="card-body">
+             <div class="row mb-3">
+                <div class="col-md-4"><label>Data de Admissão:</label><input type="date" id="data_admissao" name="data_admissao" class="form-control" value="{{ requerimento.data_admissao.strftime('%Y-%m-%d') if requerimento.data_admissao else '' }}"></div>
+                 <div class="col-md-4"><label>Função:</label><input type="text" value="{{ requerimento.servidor.funcao }}" class="form-control" readonly></div>
+                 <div class="col-md-4"><label>Lotação:</label><input type="text" value="{{ requerimento.servidor.lotacao }}" class="form-control" readonly></div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-5">
+                    <label for="natureza" class="form-label">Natureza do Requerimento*</label>
+                    <select class="form-select" id="natureza" name="natureza" required>
+                        <option value="Férias" {% if requerimento.natureza == 'Férias' %}selected{% endif %}>Férias</option>
+                        <option value="Licença Maternidade" {% if requerimento.natureza == 'Licença Maternidade' %}selected{% endif %}>Licença Maternidade</option>
+                        <option value="Licença Premium" {% if requerimento.natureza == 'Licença Premium' %}selected{% endif %}>Licença Prêmio</option>
+                        <option value="Afastamento Médico" {% if requerimento.natureza == 'Afastamento Médico' %}selected{% endif %}>Afastamento Médico</option>
+                        <option value="Pedido de Aposentadoria" {% if requerimento.natureza == 'Pedido de Aposentadoria' %}selected{% endif %}>Pedido de Aposentadoria</option>
+                        <option value="Outro" {% if requerimento.natureza == 'Outro' %}selected{% endif %}>Outro</option>
+                    </select>
+                </div>
+                <div class="col-md-7" id="outro_campo_div" style="display: {% if requerimento.natureza == 'Outro' %}block{% else %}none{% endif %};">
+                    <label for="natureza_outro" class="form-label">Especifique a natureza*</label>
+                    <input type="text" class="form-control" id="natureza_outro" name="natureza_outro" value="{{ requerimento.natureza_outro or '' }}">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="data_inicio_requerimento" class="form-label">Início do Requerimento*</label>
+                    <input type="date" class="form-control" id="data_inicio_requerimento" name="data_inicio_requerimento" value="{{ requerimento.data_inicio_requerimento.strftime('%Y-%m-%d') }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="duracao" class="form-label">Duração (em dias)</label>
+                    <input type="text" class="form-control" id="duracao" name="duracao" value="{{ requerimento.duracao or '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="periodo_aquisitivo" class="form-label">Período Aquisitivo (Ex: 2023/2024)</label>
+                    <input type="text" class="form-control" id="periodo_aquisitivo" name="periodo_aquisitivo" value="{{ requerimento.periodo_aquisitivo or '' }}">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="informacoes_complementares" class="form-label">Informações Complementares</label>
+                <textarea class="form-control" id="informacoes_complementares" name="informacoes_complementares" rows="4">{{ requerimento.informacoes_complementares or '' }}</textarea>
+            </div>
+             <div class="mb-3">
+                <label for="parecer_juridico" class="form-label">Parecer Jurídico</label>
+                <textarea class="form-control" id="parecer_juridico" name="parecer_juridico" rows="4">{{ requerimento.parecer_juridico or '' }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('listar_requerimentos') }}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const naturezaSelect = document.getElementById('natureza');
+    const outroDiv = document.getElementById('outro_campo_div');
+    const outroInput = document.getElementById('natureza_outro');
+
+    naturezaSelect.addEventListener('change', function() {
+        if (this.value === 'Outro') {
+            outroDiv.style.display = 'block';
+            outroInput.required = true;
+        } else {
+            outroDiv.style.display = 'none';
+            outroInput.required = false;
+        }
+    });
+});
+</script>
+{% endblock %}

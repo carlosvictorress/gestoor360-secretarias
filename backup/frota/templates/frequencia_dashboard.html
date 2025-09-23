@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard de Frequência{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+    #mapaEscolas {
+        height: 500px;
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-bar-chart-line-fill"></i> Dashboard de Frequência</h2>
+    <a href="#" class="btn btn-primary"><i class="bi bi-file-earmark-pdf"></i> Gerar Relatório do Mês</a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-map-fill"></i> Escolas no Mapa</h5>
+            </div>
+            <div class="card-body">
+                <div id="mapaEscolas"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-person-x-fill"></i> Servidores Faltosos (Hoje)</h5>
+            </div>
+            <div class="card-body">
+                {% if faltosos_por_escola %}
+                    <ul class="list-group list-group-flush">
+                        {% for escola, total in faltosos_por_escola.items()|sort %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ escola }}
+                            <span class="badge bg-danger rounded-pill">{{ total }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-success text-center mt-3">Nenhuma falta registrada hoje!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="bi bi-graph-up"></i> Pontos Registrados (Últimos 7 dias)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="graficoPontosDiarios"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- INICIALIZAÇÃO DO MAPA ---
+        const mapa = L.map('mapaEscolas').setView([-8.45, -37.58], 7); // Centro aproximado de PE
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mapa);
+
+        // Adiciona os marcadores das escolas no mapa
+        const escolas = JSON.parse('{{ escolas_json | safe }}');
+        escolas.forEach(escola => {
+            L.marker([escola.lat, escola.lon]).addTo(mapa)
+                .bindPopup(`<b>${escola.nome}</b>`);
+        });
+
+        // --- INICIALIZAÇÃO DO GRÁFICO ---
+        const ctx = document.getElementById('graficoPontosDiarios');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: JSON.parse('{{ labels_dias | safe }}'),
+                datasets: [{
+                    label: 'Total de Registros',
+                    data: JSON.parse('{{ dados_dias | safe }}'),
+                    backgroundColor: 'rgba(0, 77, 64, 0.6)',
+                    borderColor: 'rgba(0, 77, 64, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0 // Garante que o eixo Y não tenha casas decimais
+                        }
+                    }
+                },
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

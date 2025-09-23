@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciar Escolas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-building"></i> Escolas da Rede Municipal</h2>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex align-items-center">
+        
+        <a href="{{ url_for('merenda.painel_solicitacoes') }}" class="btn btn-outline-secondary me-2"><i class="bi bi-clipboard-check"></i> Solicitações</a>
+        <a href="{{ url_for('merenda.listar_produtos') }}" class="btn btn-outline-secondary me-2"><i class="bi bi-box-seam"></i> Produtos</a>
+    </div>
+    <div>
+        <a href="{{ url_for('merenda.nova_escola') }}" class="btn btn-primary"><i class="bi bi-plus-circle-fill"></i> Adicionar Nova Escola</a>
+    </div>
+</div>
+
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nome da Escola</th>
+                        <th>Responsável pela Merenda</th>
+                        <th>Telefone</th>
+                        <th>Status</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for escola in escolas %}
+                    <tr>
+                        <td>{{ escola.nome }}</td>
+                        <td>{{ escola.responsavel_merenda.nome if escola.responsavel_merenda else 'Não definido' }}</td>
+                        <td>{{ escola.telefone or 'Não informado' }}</td>
+                        <td>
+                            <span class="badge {{ 'bg-success' if escola.status == 'Ativa' else 'bg-secondary' }}">
+                                {{ escola.status }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('merenda.editar_escola', escola_id=escola.id) }}" class="btn btn-sm btn-secondary" title="Editar Escola"><i class="bi bi-pencil-fill"></i> Editar</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhuma escola cadastrada.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

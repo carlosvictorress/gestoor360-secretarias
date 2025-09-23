@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório Consolidado Mensal{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-file-earmark-spreadsheet"></i> Relatório Consolidado de Consumo Mensal</h2>
+<hr>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="mes" class="form-label">Mês</label>
+                    <select class="form-select" name="mes" id="mes">
+                        {% for num, nome in meses_pt.items() %}
+                        <option value="{{ num }}" {{ 'selected' if num == mes_selecionado }}>{{ nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label for="ano" class="form-label">Ano</label>
+                    <select class="form-select" name="ano" id="ano">
+                        {% for a in anos_disponiveis %}
+                        <option value="{{ a }}" {{ 'selected' if a == ano_selecionado }}>{{ a }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-info w-100"><i class="bi bi-search"></i> Buscar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if resultados is defined and resultados is not none %}
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Consumo Total em {{ meses_pt[mes_selecionado] }}/{{ ano_selecionado }}</h5>
+        <a href="{{ url_for('merenda.relatorio_consolidado_mensal', mes=mes_selecionado, ano=ano_selecionado, gerar_pdf=True) }}" class="btn btn-danger" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Gerar PDF
+        </a>
+    </div>
+    <div class="card-body">
+        {% if resultados %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Quantidade Total Consumida</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in resultados %}
+                    <tr>
+                        <td>{{ r.nome }}</td>
+                        <td>{{ "%.2f"|format(r.total_quantidade) }} {{ r.unidade_medida }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center text-muted">Nenhum consumo registrado para o período selecionado.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

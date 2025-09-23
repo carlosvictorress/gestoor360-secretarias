@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório de Abastecimentos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-file-earmark-text-fill"></i> Relatório de Abastecimentos e Consumo</h2>
+    <a href="{{ url_for('lancar_abastecimento') }}" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Voltar</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5>Filtrar Relatório</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('relatorio_combustivel') }}">
+            <p>Preencha os campos para filtrar. Deixe o dia e o mês em branco para filtrar pelo ano inteiro, ou apenas o dia para filtrar pelo mês inteiro.</p>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="placa" class="form-label">Veículo (Opcional)</label>
+                    <select name="placa" id="placa" class="form-select">
+                        <option value="">Todos os veículos</option>
+                        {% for v in veiculos %}
+                        <option value="{{ v.placa }}" {% if request.args.get('placa') == v.placa %}selected{% endif %}>{{ v.modelo }} - {{ v.placa }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="dia" class="form-label">Dia</label>
+                    <input type="number" name="dia" class="form-control" placeholder="DD" value="{{ request.args.get('dia', '') }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="mes" class="form-label">Mês</label>
+                    <input type="number" name="mes" class="form-control" placeholder="MM" value="{{ request.args.get('mes', '') }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="ano" class="form-label">Ano*</label>
+                    <input type="number" name="ano" class="form-control" placeholder="AAAA" value="{{ request.args.get('ano', '') or current_year }}" required>
+                </div>
+                <div class="col-md-3">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-filter"></i> Filtrar</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5>Resultados da Análise</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Data</th>
+                        <th>Veículo</th>
+                        <th>KM Atual</th>
+                        <th>Litros</th>
+                        <th>KM Rodado</th>
+                        <th>Consumo (KM/L)</th>
+                        <th>Custo/KM (R$)</th>
+                        <th>Valor Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in resultados %}
+                    {% set r = item.abastecimento %}
+                    <tr>
+                        <td>{{ r.data.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ r.veiculo.modelo }} ({{ r.veiculo_placa }})</td>
+                        <td>{{ "%.1f"|format(r.quilometragem)|replace('.', ',') }}</td>
+                        <td>{{ "%.2f"|format(r.litros)|replace('.', ',') }}</td>
+                        
+                        {% if item.km_rodado > 0 %}
+                            <td>{{ "%.1f"|format(item.km_rodado)|replace('.', ',') }}</td>
+                            <td>
+                                {% if item.consumo_kml > 0 and item.consumo_kml < 7.0 %}
+                                    <span class="badge bg-danger" title="Consumo excessivo!">{{ "%.2f"|format(item.consumo_kml)|replace('.', ',') }}</span>
+                                {% else %}
+                                    {{ "%.2f"|format(item.consumo_kml)|replace('.', ',') }}
+                                {% endif %}
+                            </td>
+                            <td>{{ "%.2f"|format(item.custo_km)|replace('.', ',') }}</td>
+                        {% else %}
+                            <td class="text-muted text-center" title="Primeiro registro no período filtrado">--</td>
+                            <td class="text-muted text-center" title="Primeiro registro no período filtrado">--</td>
+                            <td class="text-muted text-center" title="Primeiro registro no período filtrado">--</td>
+                        {% endif %}
+
+                        <td>R$ {{ "%.2f"|format(r.valor_total)|replace('.', ',') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="8" class="text-center">Nenhum resultado encontrado. Aplique um filtro para começar.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

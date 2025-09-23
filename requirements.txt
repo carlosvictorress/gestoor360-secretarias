@@ -1,0 +1,8 @@
+Flask
+Flask-SQLAlchemy
+reportlab
+num2words
+Flask-Bcrypt
+gunicorn
+psycopg2-binary
+qrcode[pil]

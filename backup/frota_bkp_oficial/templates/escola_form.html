@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-building"></i> {{ titulo }}</h2>
+<hr>
+
+<form method="POST">
+    <div class="row">
+        <div class="col-md-8 mb-3">
+            <label for="nome" class="form-label">Nome da Escola <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="nome" name="nome" value="{{ escola.nome if escola else '' }}" required>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status">
+                <option value="Ativa" {% if escola and escola.status == 'Ativa' %}selected{% endif %}>Ativa</option>
+                <option value="Inativa" {% if escola and escola.status == 'Inativa' %}selected{% endif %}>Inativa</option>
+            </select>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="endereco" class="form-label">Endereço</label>
+        <input type="text" class="form-control" id="endereco" name="endereco" value="{{ escola.endereco if escola else '' }}">
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label for="telefone" class="form-label">Telefone</label>
+            <input type="text" class="form-control" id="telefone" name="telefone" value="{{ escola.telefone if escola else '' }}">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="latitude" class="form-label">Latitude <span class="text-danger">*</span></label>
+            <input type="number" step="any" class="form-control" id="latitude" name="latitude" value="{{ escola.latitude if escola else '' }}" required placeholder="-8.123456">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="longitude" class="form-label">Longitude <span class="text-danger">*</span></label>
+            <input type="number" step="any" class="form-control" id="longitude" name="longitude" value="{{ escola.longitude if escola else '' }}" required placeholder="-35.123456">
+        </div>
+    </div>
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar</button>
+        <a href="{{ url_for('escola.listar_escolas') }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

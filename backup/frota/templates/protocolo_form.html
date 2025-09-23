@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Protocolo{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-plus-circle-fill"></i> Registar Novo Protocolo</h2>
+<p class="text-muted">Preencha as informações abaixo para abrir um novo processo.</p>
+
+<form method="POST" enctype="multipart/form-data" class="mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5>Dados do Processo</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="tipo_documento" class="form-label">Tipo de Documento*</label>
+                    <input type="text" class="form-control" id="tipo_documento" name="tipo_documento" placeholder="Ex: Ofício, Requerimento, Memorando" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="interessado" class="form-label">Interessado*</label>
+                    <input type="text" class="form-control" id="interessado" name="interessado" placeholder="Nome da pessoa, empresa ou setor" required>
+                </div>
+                <div class="col-12">
+                    <label for="assunto" class="form-label">Assunto*</label>
+                    <textarea class="form-control" id="assunto" name="assunto" rows="3" required></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label for="setor_origem" class="form-label">Setor de Destino Inicial*</label>
+                    <select class="form-select" id="setor_origem" name="setor_origem" required>
+                        <option value="" selected disabled>-- Selecione um setor --</option>
+                        <option value="Gabinete do Secretário">Gabinete do Secretário</option>
+                        <option value="Recursos Humanos">Recursos Humanos</option>
+                        <option value="Departamento Pedagógico">Departamento Pedagógico</option>
+                        <option value="Transporte Escolar">Transporte Escolar</option>
+                        <option value="Almoxarifado">Almoxarifado</option>
+                        <option value="Financeiro">Financeiro</option>
+						<option value="Administracao">Administracao</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="anexos" class="form-label">Anexar Ficheiros (Opcional)</label>
+                    <input class="form-control" type="file" id="anexos" name="anexos" multiple>
+                    <div class="form-text">Pode selecionar múltiplos ficheiros.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('protocolo.listar_protocolos') }}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Registar Protocolo</button>
+    </div>
+</form>
+{% endblock %}

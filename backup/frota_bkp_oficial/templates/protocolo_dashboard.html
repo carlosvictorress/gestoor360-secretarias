@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard do Protocolo{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-folder2-open"></i> Módulo de Protocolo Online</h2>
+    <a href="{{ url_for('protocolo.novo_protocolo') }}" class="btn btn-primary">... Novo Protocolo</a>
+
+</div>
+
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-files fs-1"></i>
+                <h3 class="card-title mt-2">{{ total_protocolos }}</h3>
+                <p class="card-text">Total de Protocolos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-dark bg-warning shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-hourglass-split fs-1"></i>
+                <h3 class="card-title mt-2">{{ protocolos_em_tramitacao }}</h3>
+                <p class="card-text">Em Tramitação</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-box-arrow-in-down fs-1"></i>
+                <h3 class="card-title mt-2">{{ protocolos_abertos }}</h3>
+                <p class="card-text">Abertos / Recebidos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-check2-circle fs-1"></i>
+                <h3 class="card-title mt-2">{{ protocolos_finalizados }}</h3>
+                <p class="card-text">Finalizados</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-5">
+    <a href="{{ url_for('protocolo.listar_protocolos') }}" class="btn btn-lg btn-outline-primary">
+        <i class="bi bi-table"></i> Ver Todos os Protocolos
+    </a>
+</div>
+{% endblock %}

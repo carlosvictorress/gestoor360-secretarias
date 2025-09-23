@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Editor de Cardápios Mensais{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-calendar-month"></i> Editor de Cardápios Mensais</h2>
+<hr>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="escola_id" class="form-label">Selecione a Escola</label>
+                    <select class="form-select" name="escola_id" id="escola_id" onchange="this.form.submit()">
+                        <option value="">-- Selecione uma escola --</option>
+                        {% for e in escolas %}
+                        <option value="{{ e.id }}" {{ 'selected' if e.id == escola_selecionada_id }}>{{ e.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="mes" class="form-label">Mês</label>
+                    <select class="form-select" name="mes" id="mes">
+                        {% for num, nome in meses_pt.items() %}
+                        <option value="{{ num }}" {{ 'selected' if num == mes_selecionado }}>{{ nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="ano" class="form-label">Ano</label>
+                    <select class="form-select" name="ano" id="ano">
+                        {% for a in anos_disponiveis %}
+                        <option value="{{ a }}" {{ 'selected' if a == ano_selecionado }}>{{ a }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-info w-100"><i class="bi bi-search"></i> Carregar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if escola_selecionada_id %}
+<form method="POST">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5>Definindo Cardápio para: {{ meses_pt[mes_selecionado] }} / {{ ano_selecionado }}</h5>
+        </div>
+        <div class="card-body">
+            <input type="hidden" name="escola_id" value="{{ escola_selecionada_id }}">
+            <input type="hidden" name="mes" value="{{ mes_selecionado }}">
+            <input type="hidden" name="ano" value="{{ ano_selecionado }}">
+
+            <table class="table table-bordered text-center" style="table-layout: fixed;">
+                <thead class="table-light">
+                    <tr>
+                        {% for dia in ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'] %}
+                        <th style="width: 14.28%;">{{ dia }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for semana in calendario_mes %}
+                    <tr>
+                        {% for dia_num in semana %}
+                        <td style="height: 120px; vertical-align: top; {% if dia_num == 0 %}background-color: #f8f9fa;{% endif %}">
+                            {% if dia_num != 0 %}
+                                <div class="fw-bold">{{ dia_num }}</div>
+                                {% set data_atual = date(ano_selecionado, mes_selecionado, dia_num) %}
+                                <textarea class="form-control form-control-sm mt-1" 
+                                          name="prato_{{ data_atual.strftime('%Y-%m-%d') }}" 
+                                          rows="3" 
+                                          placeholder="Prato do dia...">{{ pratos.get(data_atual, '') }}</textarea>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer text-end">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill"></i> Salvar Cardápio</button>
+        </div>
+    </div>
+</form>
+{% else %}
+<div class="alert alert-info" role="alert">
+  Por favor, selecione uma escola para visualizar ou editar o cardápio.
+</div>
+{% endif %}
+
+{% endblock %}

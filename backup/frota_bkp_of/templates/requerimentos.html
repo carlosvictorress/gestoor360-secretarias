@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Módulo de Requerimentos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Requerimentos</h2>
+    <a href="{{ url_for('novo_requerimento') }}" class="btn btn-primary"><i class="bi bi-plus-circle-fill"></i> Novo Requerimento</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Protocolo</th>
+                        <th>Servidor</th>
+                        <th>CPF</th>
+                        <th>Natureza</th>
+                        <th>Data Início</th>
+						<th>Status / Conclusão</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requerimentos %}
+                    <tr>
+                        <td>{{ req.id }}</td>
+                        <td>{{ req.servidor.nome }}</td>
+                        <td>{{ req.servidor_cpf }}</td>
+                        <td>{{ req.natureza }}</td>
+                        <td>{{ req.data_inicio_requerimento.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if req.status == 'Aprovado' %} bg-success 
+                                {% elif req.status == 'Recusado' %} bg-danger 
+								{% elif req.status == 'Concluído' %} bg-primary
+                                {% elif req.status == 'Em Análise' %} bg-warning text-dark
+                                {% else %} bg-secondary {% endif %}">
+                                {{ req.status }}
+                            </span>
+							{% if req.data_conclusao %}
+							<br><small class="text-muted">em {{ req.data_conclusao.strftime('%d/%m/%Y') }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <!-- <a href="{{ url_for('gerar_requerimento_pdf', req_id=req.id) }}" class="btn btn-sm btn-info" title="Imprimir" target="_blank"> -->
+    <!-- <i class="bi bi-printer-fill"></i> -->
+<!-- </a> -->
+                            <!-- <a href="#" class="btn btn-sm btn-secondary" title="Editar"><i class="bi bi-pencil-fill"></i></a> -->
+                            <!-- <a href="#" class="btn btn-sm btn-danger" title="Excluir" onclick="return confirm('Tem certeza?');"><i class="bi bi-trash-fill"></i></a> -->
+							<a href="{{ url_for('gerar_requerimento_pdf', req_id=req.id) }}" class="btn btn-sm btn-info" title="Imprimir" target="_blank"><i class="bi bi-printer-fill"></i></a>
+                           <a href="{{ url_for('editar_requerimento', req_id=req.id) }}" class="btn btn-sm btn-secondary" title="Editar"><i class="bi bi-pencil-fill"></i></a>	
+                           <a href="#" class="btn btn-sm btn-danger" title="Excluir" onclick="return confirm('Tem certeza?');"><i class="bi bi-trash-fill"></i></a>
+							 <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#statusModal" 
+                                   data-req-id="{{ req.id }}" 
+                                   data-req-nome="{{ req.servidor.nome }}" 
+                                  data-current-status="{{ req.status }}"
+                                   title="Mudar Status">
+                               <i class="bi bi-check-circle-fill"></i>
+                           </button>		
+						
+						
+						
+						</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">Nenhum requerimento encontrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+     <div class="modal-header">
+       <h5 class="modal-title" id="statusModalLabel">Alterar Status do Requerimento</h5>
+       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="statusForm" method="POST" action="{{ url_for('mudar_status_requerimento_modal') }}">
+        <div class="modal-body">
+            <p>Você está alterando o status para o requerimento do servidor <strong id="servidorNome"></strong>.</p>
+            
+            <input type="hidden" name="req_id" id="modal_req_id">
+
+            <div class="mb-3">
+                <label for="novo_status" class="form-label">Novo Status*</label>
+                <select class="form-select" id="novo_status" name="novo_status" required>
+                    <option value="Aprovado">Aprovado</option>
+                    <option value="Recusado">Recusado</option>
+                    <option value="Concluído">Concluído</option>
+                    <option value="Em Análise">Em Análise</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Alteração</button>
+        </div>
+      </form>
+    </div>
+ </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var statusModal = document.getElementById('statusModal');
+    statusModal.addEventListener('show.bs.modal', function (event) {
+       // Botão que acionou o modal
+        var button = event.relatedTarget;
+
+        // Extrai as informações dos atributos data-*
+        var reqId = button.getAttribute('data-req-id');
+        var servidorNome = button.getAttribute('data-req-nome');
+        var currentStatus = button.getAttribute('data-current-status');
+
+        // Atualiza o conteúdo do modal
+        var modalTitle = statusModal.querySelector('.modal-title');
+        var modalServidorNome = statusModal.querySelector('#servidorNome');
+       var modalReqIdInput = statusModal.querySelector('#modal_req_id');
+        var modalStatusSelect = statusModal.querySelector('#novo_status');
+
+        modalTitle.textContent = 'Alterar Status do Req. #' + reqId;
+        modalServidorNome.textContent = servidorNome;
+        modalReqIdInput.value = reqId;
+        modalStatusSelect.value = currentStatus; // Pré-seleciona o status atual
+    });
+});
+</script>
+{% endblock %}

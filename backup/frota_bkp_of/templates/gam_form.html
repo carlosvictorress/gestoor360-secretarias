@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}{% if gam %}Editar{% else %}Nova{% endif %} Guia de Atendimento Médico{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h3>{% if gam %}Editar{% else %}Nova{% endif %} Guia de Atendimento Médico (GAM)</h3>
+        <h6>PREFEITURA MUNICIPAL DE VALENÇA DO PIAUÍ</h6>
+    </div>
+    <hr>
+    
+    <form method="POST" action="{{ url_for('editar_gam', gam_id=gam.id) if gam else url_for('criar_gam') }}" class="mt-4">
+        <div class="card mb-4">
+            <div class="card-header">1 - Dados do Servidor</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label for="servidor_num_contrato">NOME DO SERVIDOR:</label>
+                        <select name="servidor_num_contrato" id="servidor_num_contrato" class="form-control" {% if gam %}disabled{% endif %} required>
+                            <option value="">Selecione um servidor...</option>
+                            {% for s in servidores %}
+                            <option value="{{ s.num_contrato }}" {% if gam and gam.servidor_num_contrato == s.num_contrato %}selected{% endif %}>{{ s.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label for="matricula">MATRÍCULA N.:</label>
+                        <input type="text" id="matricula" class="form-control" value="{{ gam.servidor.num_contrato if gam else '' }}" readonly>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label for="lotacao">LOTAÇÃO:</label>
+                        <input type="text" id="lotacao" class="form-control" value="{{ gam.servidor.lotacao if gam else '' }}" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">2 - OBSERVAÇÕES DA CHEFIA (ESPECIFICAR A DESCRIÇÃO DO CARGO/FUNÇÃO)</div>
+            <div class="card-body">
+                <div class="form-group">
+                    <textarea name="texto_inicial_observacoes" id="texto_inicial_observacoes" class="form-control" rows="3">{{ gam.texto_inicial_observacoes or '' }}</textarea>
+                </div>
+                <hr>
+                <p class="text-muted">Na declaração médica,</p>
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-right">datada do dia</div>
+                    <div class="col-md-3">
+                        <input type="date" name="data_laudo" class="form-control" value="{{ gam.data_laudo.strftime('%Y-%m-%d') if gam and gam.data_laudo else '' }}" required>
+                    </div>
+                    <div class="col-md-2 text-right">, o(a) médico(a)</div>
+                    <div class="col-md-5">
+                        <input type="text" name="medico_laudo" class="form-control" value="{{ gam.medico_laudo or '' }}" placeholder="Ex: psiquiatra" required>
+                    </div>
+                </div>
+
+                <div class="row align-items-center mt-2">
+                    <div class="col-md-2 text-right">recomenda</div>
+                    <div class="col-md-2">
+                        <input type="number" name="dias_afastamento_laudo" class="form-control" value="{{ gam.dias_afastamento_laudo or '' }}" placeholder="Ex: 90" required>
+                    </div>
+                    <div class="col-md-8">dias de afastamento das suas atividades laborais, pois declara que</div>
+                </div>
+
+                <div class="form-group mt-2">
+                     <textarea name="justificativa_laudo" class="form-control" rows="2" placeholder="Ex: a servidora se encontra em episódio de mania..." required>{{ gam.justificativa_laudo or '' }}</textarea>
+                </div>
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-3 form-group">
+                        <label for="cid10">CID 10:</label>
+                        <input type="text" name="cid10" id="cid10" class="form-control" value="{{ gam.cid10 or '' }}">
+                    </div>
+                </div>
+                
+                <p>Desse modo, encaminho o(a) servidor(a) <strong id="nome_encaminhamento">{{ gam.servidor.nome if gam else '[NOME DO SERVIDOR]' }}</strong> para perícia médica do município.</p>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ url_for('listar_gams') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-success">{% if gam %}Salvar Alterações{% else %}Gerar Guia{% endif %}</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const servidorSelect = document.getElementById('servidor_num_contrato');
+        if (servidorSelect.disabled) {
+            return;
+        }
+
+        servidorSelect.addEventListener('change', function() {
+            const numContrato = this.value;
+            const matriculaInput = document.getElementById('matricula');
+            const lotacaoInput = document.getElementById('lotacao');
+            const nomeEncaminhamento = document.getElementById('nome_encaminhamento');
+            const textoInicial = document.getElementById('texto_inicial_observacoes');
+
+            if (!numContrato) {
+                matriculaInput.value = '';
+                lotacaoInput.value = '';
+                nomeEncaminhamento.textContent = '[NOME DO SERVIDOR]';
+                textoInicial.value = '';
+                return;
+            }
+
+            fetch(`/api/servidor-details/${numContrato}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error(data.error);
+                        return;
+                    }
+                    matriculaInput.value = data.matricula || '';
+                    lotacaoInput.value = data.lotacao || '';
+                    nomeEncaminhamento.textContent = data.nome || '[NOME DO SERVIDOR]';
+                    textoInicial.value = `A requerente é efetiva da rede municipal de ensino, tendo sido admitida em ${data.data_admissao || '[data de admissão]'} para a função ${data.funcao || '[função]'}, lotada atualmente no ${data.lotacao || '[lotação]'}.`;
+                });
+        });
+    });
+</script>
+{% endblock %}

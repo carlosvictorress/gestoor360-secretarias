@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>GAM - {{ guia.servidor.nome }}</title>
+    <style>
+        body { background: #EEE; margin: 0; font-family: 'Times New Roman', serif; font-size: 12pt; }
+        .pagina {
+            background: white;
+            width: 21cm;
+            min-height: 29.7cm;
+            display: block;
+            margin: 20px auto;
+            padding: 2cm;
+            box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+        .text-center { text-align: center; }
+        .header-main { font-size: 14pt; font-weight: bold; margin-bottom: 2px; }
+        .header-sub { font-size: 12pt; font-weight: bold; margin-bottom: 2cm; }
+        p { margin: 0; padding: 0; line-height: 1.5; }
+        .secao-servidor { margin-bottom: 1cm; }
+        .secao-servidor p { font-weight: bold; }
+        .secao-observacoes p { text-align: justify; text-indent: 2cm; }
+        .secao-observacoes .encaminhamento { text-indent: 0; margin-top: 1cm; }
+        .secao-data-hora { margin-top: 1cm; }
+        .bloco-assinatura { text-align: center; margin-top: 0.5cm; }
+        .linha-assinatura { border-bottom: 1px solid #000; width: 60%; margin: 0 auto; padding-top: 2cm;}
+        .legenda-assinatura { font-size: 10pt; }
+        .secao-medico { border-top: 1px dashed #000; margin-top: 2cm; padding-top: 1cm; }
+
+        .botoes-acao { text-align: center; padding: 15px; background: #333; }
+        .botoes-acao button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+        
+        @media print {
+            body, .pagina { margin: 0; background: white; box-shadow: none; }
+            .botoes-acao { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="botoes-acao">
+        <button onclick="window.print()">Imprimir</button>
+    </div>
+
+    <div class="pagina">
+        <div class="text-center">
+            <p class="header-main">GUIA PARA ATENDIMENTO MÉDICO - GAM</p>
+            <p class="header-sub">PREFEITURA MUNICIPAL DE VALENÇA DO PIAUÍ</p>
+        </div>
+
+        <div class="secao-servidor">
+            <p>1-NOME DO SERVIDOR: {{ guia.servidor.nome | upper }} &nbsp;&nbsp;&nbsp; MATRÍCULA N. {{ guia.servidor.num_contrato }} &nbsp;&nbsp;&nbsp; LOTAÇÃO: {{ guia.servidor.lotacao }}</p>
+        </div>
+        
+        <div class="secao-observacoes">
+            <p><strong>OBSERVAÇÕES DA CHEFIA (ESPECIFICAR A DESCRIÇÃO DO CARGO/FUNÇÃO)</strong></p>
+            <br>
+            <p>{{ guia.texto_inicial_observacoes }} Na declaração médica, datada do dia {{ guia.data_laudo.strftime('%d de %B de %Y') if guia.data_laudo else '[data]' }}, o(a) médico(a) {{ guia.medico_laudo }} recomenda {{ guia.dias_afastamento_laudo }} dias de afastamento das suas atividades laborais, pois declara que {{ guia.justificativa_laudo }}.</p>
+            <br>
+            <p><strong>CID 10: {{ guia.cid10 or 'Não informado' }}</strong></p>
+            <p class="encaminhamento">Desse modo, encaminho o(a) servidor(a) {{ guia.servidor.nome }} para perícia médica do município.</p>
+        </div>
+        
+        <div class="secao-data-hora">
+            <p>DATA: {{ guia.data_emissao.strftime('%d/%m/%Y') }}, HORA: {{ guia.data_emissao.strftime('%H:%M') }}</p>
+            <div class="bloco-assinatura">
+                <div class="linha-assinatura"></div>
+                <p class="legenda-assinatura">ASSINATURA E CARIMBO DA CHEFIA</p>
+            </div>
+        </div>
+        
+        <div class="secao-medico">
+            <p>2-DATA DO ATENDIMENTO: ______/______/__________ &nbsp;&nbsp;&nbsp; HORA DO ATENDIMENTO:_____:_____ h.</p>
+            <br><br>
+            <p>RECOMENDAÇÕES DO MÉDICO</p>
+            <br><br><br><br><br>
+            <div class="bloco-assinatura">
+                <p>DATA: ______/______/__________</p>
+                <div class="linha-assinatura"></div>
+                <p class="legenda-assinatura">ASSINATURA E CARIMBO DO MÉDICO</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

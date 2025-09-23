@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Controle de Patrimônio{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-archive-fill"></i> Itens Patrimoniais</h2>
+    <a href="{{ url_for('patrimonio.novo_item') }}" class="btn btn-primary"><i class="bi bi-plus-circle-fill"></i> Adicionar Novo Item</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('patrimonio.listar_itens') }}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-10">
+                    <label for="termo" class="form-label">Buscar por Nº Patrimônio, Descrição ou Localização</label>
+                    <input type="text" class="form-control" id="termo" name="termo" value="{{ termo_busca }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-info w-100"><i class="bi bi-search"></i> Buscar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Nº Patrimônio</th>
+                <th>Descrição</th>
+                <th>Localização Atual</th>
+                <th>Responsável</th>
+                <th>Status</th>
+                <th class="text-center">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr>
+                <td>{{ item.numero_patrimonio }}</td>
+                <td>{{ item.descricao }}</td>
+                <td>{{ item.localizacao }}</td>
+                <td>{{ item.responsavel.nome if item.responsavel else 'Sem responsável' }}</td>
+                <td>
+                    <span class="badge 
+                        {% if item.status == 'Ativo' %} bg-success
+                        {% elif item.status == 'Manutenção' %} bg-warning
+                        {% elif item.status == 'Baixado' %} bg-secondary
+                        {% else %} bg-info {% endif %}">
+                        {{ item.status }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <a href="{{ url_for('patrimonio.detalhes_item', item_id=item.id) }}" class="btn btn-sm btn-secondary" title="Ver Detalhes e Histórico"><i class="bi bi-eye-fill"></i> Detalhes</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">Nenhum item patrimonial encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

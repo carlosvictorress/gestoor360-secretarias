@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Protocolo {{ protocolo.numero_protocolo }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-file-earmark-text-fill"></i> Protocolo: {{ protocolo.numero_protocolo }}</h2>
+    <a href="{{ url_for('protocolo.listar_protocolos') }}" class="btn btn-secondary"><i class="bi bi-arrow-left-circle"></i> Voltar para a Lista</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle-fill"></i> Dados do Processo</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Assunto:</strong> {{ protocolo.assunto }}</p>
+                <p><strong>Interessado:</strong> {{ protocolo.interessado }}</p>
+                <p><strong>Tipo de Documento:</strong> {{ protocolo.tipo_documento }}</p>
+                <p><strong>Data de Abertura:</strong> {{ protocolo.data_criacao.strftime('%d/%m/%Y %H:%M') }}</p>
+                <p><strong>Setor de Origem:</strong> {{ protocolo.setor_origem }}</p>
+                <hr>
+                <p><strong>Setor Atual:</strong> <span class="fw-bold">{{ protocolo.setor_atual }}</span></p>
+                <p><strong>Status:</strong> <span class="badge fs-6 {% if protocolo.status == 'Aberto' %} bg-info text-dark {% elif protocolo.status == 'Em Tramitação' %} bg-warning text-dark {% elif protocolo.status == 'Finalizado' %} bg-success {% elif protocolo.status == 'Cancelado' %} bg-danger {% else %} bg-secondary {% endif %}">{{ protocolo.status }}</span></p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5><i class="bi bi-sign-turn-right-fill"></i> Histórico de Tramitações</h5>
+            </div>
+            <div class="card-body">
+                {% if protocolo.tramitacoes %}
+                    <ul class="list-group list-group-flush">
+                        {% for tramitacao in protocolo.tramitacoes|reverse %}
+                        <li class="list-group-item">
+                            <p class="mb-1">
+                                De: <strong>{{ tramitacao.setor_origem }}</strong> <i class="bi bi-arrow-right"></i> Para: <strong>{{ tramitacao.setor_destino }}</strong>
+                            </p>
+                            <p class="mb-1"><strong>Despacho/Observação:</strong> {{ tramitacao.despacho or 'Nenhuma observação.' }}</p>
+                            <small class="text-muted">Enviado por {{ tramitacao.usuario_responsavel }} em {{ tramitacao.data_envio.strftime('%d/%m/%Y às %H:%M') }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">Nenhuma tramitação registada para este protocolo.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5><i class="bi bi-send-fill"></i> Ações</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="setor_destino" class="form-label"><strong>Enviar para o Setor:</strong></label>
+                        <select id="setor_destino" name="setor_destino" class="form-select" required>
+                            <option value="" disabled selected>Selecione um destino...</option>
+                            {% for setor in setores %}
+                                {% if setor != protocolo.setor_atual %}
+                                    <option value="{{ setor }}">{{ setor }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="despacho" class="form-label"><strong>Despacho / Observações:</strong></label>
+                        <textarea id="despacho" name="despacho" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-send-check-fill"></i> Tramitar Processo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5><i class="bi bi-paperclip"></i> Ficheiros Anexados</h5>
+            </div>
+            <div class="card-body">
+                {% if protocolo.anexos %}
+                    <ul class="list-group list-group-flush">
+                        {% for anexo in protocolo.anexos %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-file-earmark-arrow-down"></i> {{ anexo.nome_original }}</span>
+                            <a href="{{ url_for('protocolo.download_anexo', anexo_id=anexo.id) }}" class="btn btn-sm btn-success" title="Descarregar"><i class="bi bi-download"></i></a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">Nenhum ficheiro anexado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

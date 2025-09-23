@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório Mensal de Veículos{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h4>Gerar Relatório Mensal de Abastecimentos (CSV)</h4>
+    </div>
+    <div class="card-body">
+        <form id="reportForm" method="POST" action="{{ url_for('gerar_relatorio_veiculos_mensal') }}">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="ano" class="form-label">Ano*</label>
+                    <input type="number" class="form-control" name="ano" id="ano" value="{{ ano_atual }}" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="mes" class="form-label">Mês*</label>
+                    <select name="mes" id="mes" class="form-select" required>
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="orgao" class="form-label">Secretaria</label>
+                    <select name="orgao" id="orgao" class="form-select">
+                        <option value="todos">Todas as Secretarias</option>
+                        {% for sec in secretarias %}
+                        <option value="{{ sec.nome }}">{{ sec.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success"><i class="bi bi-download"></i> Gerar e Baixar CSV</button>
+        </form>
+    </div>
+</div>
+
+
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loadingModalLabel">Por favor, aguarde.</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 mb-0">Gerando Relatório para o Tribunal de Contas do Estado do Piuí - TCE-PI</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reportForm = document.getElementById('reportForm');
+    // Cria uma instância do Modal do Bootstrap
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+
+    // Adiciona um "escutador" para o evento de envio do formulário
+    reportForm.addEventListener('submit', function() {
+        // Quando o botão for clicado, simplesmente mostra o modal
+        loadingModal.show();
+    });
+});
+</script>
+{% endblock %}

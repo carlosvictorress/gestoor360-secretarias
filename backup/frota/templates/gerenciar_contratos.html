@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestão de Contratos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-file-text-fill"></i> Gestão de Contratos Administrativos</h2>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5>1. Gerar Novo Contrato</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="cpf_busca" class="form-label">CPF do Servidor*</label>
+                <input type="text" class="form-control" id="cpf_busca" placeholder="Digite o CPF para buscar...">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" class="btn btn-primary w-100" id="btn-buscar-servidor">Buscar Servidor</button>
+            </div>
+        </div>
+        <div id="resultado-busca" class="mt-4" style="display: none;">
+            <hr>
+            <h5>Dados do Servidor</h5>
+            <p><strong>Nome:</strong> <span id="servidor-nome"></span></p>
+            <p><strong>Função:</strong> <span id="servidor-funcao"></span></p>
+            <p><strong>Vínculo:</strong> <span id="servidor-vinculo"></span></p>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#gerarContratoModal">
+                <i class="bi bi-file-earmark-plus-fill"></i> Prosseguir para Gerar Contrato
+            </button>
+        </div>
+        <div id="erro-busca" class="alert alert-danger mt-4" style="display: none;"></div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">2. Contratos Gerados</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('contratos.gerenciar_contratos') }}" class="mb-3">
+            <div class="input-group">
+                <input type="text" class="form-control" name="q_servidor" placeholder="Pesquisar por nome do servidor..." value="{{ q_servidor or '' }}">
+                <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nº Contrato</th>
+                        <th>Servidor Contratado</th>
+                        <th>Data de Geração</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contrato in contratos %}
+                    <tr>
+                        <td><strong>{{ contrato.numero }}</strong></td>
+                        <td>{{ contrato.servidor.nome }}</td>
+                        <td>{{ contrato.data_geracao.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('contratos.visualizar_contrato_pdf', contrato_id=contrato.id) }}" target="_blank" class="btn btn-sm btn-info" title="Visualizar Contrato">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#assinaturaModal" 
+                                    data-contrato-id="{{ contrato.id }}" 
+                                    data-tipo-atual="{{ contrato.assinatura_secretaria_tipo }}"
+                                    title="Definir Assinatura">
+                                <i class="bi bi-pen-fill"></i>
+                            </button>
+                            <a href="{{ url_for('contratos.editar_contrato', contrato_id=contrato.id) }}" class="btn btn-sm btn-secondary" title="Editar">
+							<i class="bi bi-pencil-fill"></i>
+							</a>
+                            <a href="{{ url_for('contratos.excluir_contrato', contrato_id=contrato.id) }}" class="btn btn-sm btn-danger" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir permanentemente este contrato? Esta ação não pode ser desfeita.');">
+							<i class="bi bi-trash-fill"></i>
+							 </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">Nenhum contrato encontrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="gerarContratoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" action="{{ url_for('contratos.gerar_contrato') }}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Gerar Contrato</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Confirme o ano de vigência do contrato para gerar a numeração correta.</p>
+                    <input type="hidden" name="servidor_cpf" id="modal_servidor_cpf">
+                    <label for="ano_contrato" class="form-label">Ano do Contrato*</label>
+                    <input type="number" class="form-control" name="ano_contrato" id="ano_contrato" value="{{ current_year }}" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Gerar e Salvar Contrato</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="assinaturaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="POST" action="" id="formAssinatura" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Definir Assinatura da Secretaria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Escolha como a assinatura da secretaria deve aparecer no contrato.</p>
+                    
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipo_assinatura" id="tipoManual" value="manual" checked>
+                        <label class="form-check-label" for="tipoManual">
+                            Manual (deixar espaço em branco para assinar à mão)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipo_assinatura" id="tipoImagem" value="imagem">
+                        <label class="form-check-label" for="tipoImagem">
+                            Usar Imagem da Assinatura
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="tipo_assinatura" id="tipoDigital" value="digital" disabled>
+                        <label class="form-check-label text-muted" for="tipoDigital">
+                            Assinatura Digital A1 (em breve)
+                        </label>
+                    </div>
+
+                    <div id="upload-imagem-div" class="mt-3" style="display: none;">
+                        <label for="assinatura_imagem" class="form-label">Carregar Ficheiro de Imagem</label>
+                        <input class="form-control" type="file" name="assinatura_imagem" id="assinatura_imagem" accept="image/png, image/jpeg">
+                        <div class="form-text">Carregue um ficheiro de imagem (PNG, JPG) com a assinatura.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Opção</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Script para o modal de gerar contrato (sem alterações)
+document.getElementById('btn-buscar-servidor').addEventListener('click', function() {
+    const cpf = document.getElementById('cpf_busca').value;
+    const resultadoDiv = document.getElementById('resultado-busca');
+    const erroDiv = document.getElementById('erro-busca');
+
+    resultadoDiv.style.display = 'none';
+    erroDiv.style.display = 'none';
+
+    fetch(`/contratos/api/servidor/${cpf}`)
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw new Error(err.error) });
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('servidor-nome').textContent = data.nome;
+            document.getElementById('servidor-funcao').textContent = data.funcao;
+            document.getElementById('servidor-vinculo').textContent = data.tipo_vinculo;
+            document.getElementById('modal_servidor_cpf').value = data.cpf;
+            resultadoDiv.style.display = 'block';
+        })
+        .catch(error => {
+            erroDiv.textContent = error.message;
+            erroDiv.style.display = 'block';
+        });
+});
+
+// NOVO SCRIPT: Para o modal de assinatura
+document.addEventListener('DOMContentLoaded', function() {
+    const assinaturaModal = document.getElementById('assinaturaModal');
+    if (assinaturaModal) {
+        const formAssinatura = document.getElementById('formAssinatura');
+        const uploadDiv = document.getElementById('upload-imagem-div');
+        const tipoRadios = document.querySelectorAll('input[name="tipo_assinatura"]');
+
+        // Mostra/esconde o campo de upload
+        tipoRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                uploadDiv.style.display = (this.value === 'imagem') ? 'block' : 'none';
+            });
+        });
+
+        // Configura o modal quando ele é aberto
+        assinaturaModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const contratoId = button.getAttribute('data-contrato-id');
+            const tipoAtual = button.getAttribute('data-tipo-atual');
+
+            // Define a action do formulário dinamicamente
+            formAssinatura.action = `/contratos/assinatura/${contratoId}`;
+            
+            // Seleciona o radio button correto
+            const radioSelecionar = document.querySelector(`input[name="tipo_assinatura"][value="${tipoAtual}"]`);
+            if (radioSelecionar) {
+                radioSelecionar.checked = true;
+                // Dispara o evento change para mostrar/esconder o upload
+                radioSelecionar.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

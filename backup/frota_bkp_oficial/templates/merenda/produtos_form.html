@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Editar' if produto else 'Cadastrar' }} Produto{% endblock %}
+
+{% block content %}
+<h2>{{ 'Editar' if produto else 'Cadastrar' }} Produto da Merenda</h2>
+<hr>
+
+<form method="POST">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3 text-muted">Detalhes do Produto</h5>
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <label for="nome" class="form-label">Nome do Produto*</label>
+                    <input type="text" class="form-control" name="nome" id="nome" value="{{ produto.nome if produto else '' }}" required placeholder="Ex: Arroz Agulhinha Tipo 1">
+                </div>
+                 <div class="col-md-4">
+                    <label for="unidade_medida" class="form-label">Unidade de Medida*</label>
+                    <input type="text" class="form-control" name="unidade_medida" id="unidade_medida" value="{{ produto.unidade_medida if produto else '' }}" required placeholder="Ex: KG, Litro, Unidade, Pacote">
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="categoria" class="form-label">Categoria</label>
+                    <input type="text" class="form-control" name="categoria" id="categoria" value="{{ produto.categoria if produto else '' }}" placeholder="Ex: Grãos, Cereais, Proteínas, Hortifrúti">
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            <a href="{{ url_for('merenda.listar_produtos') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle-fill"></i> Salvar Produto</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

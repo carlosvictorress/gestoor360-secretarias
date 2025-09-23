@@ -1,0 +1,17 @@
+# Arquivos compilados do Python e cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Bancos de dados e instâncias locais
+/instance/
+*.sqlite
+*.db
+servidores.db
+
+# Arquivos de ambiente virtual
+/venv/
+.env
+
+# Arquivos de upload dos usuários
+/uploads/

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Editar' if escola else 'Cadastrar' }} Escola{% endblock %}
+
+{% block content %}
+<h2>{{ 'Editar' if escola else 'Cadastrar' }} Escola</h2>
+<hr>
+
+<form method="POST">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3 text-muted">Informações da Escola</h5>
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <label for="nome" class="form-label">Nome da Escola*</label>
+                    <input type="text" class="form-control" name="nome" id="nome" value="{{ escola.nome if escola else '' }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="telefone" class="form-label">Telefone</label>
+                    <input type="text" class="form-control" name="telefone" id="telefone" value="{{ escola.telefone if escola else '' }}">
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label for="endereco" class="form-label">Endereço Completo</label>
+                    <input type="text" class="form-control" name="endereco" id="endereco" value="{{ escola.endereco if escola else '' }}">
+                </div>
+            </div>
+
+            <hr>
+            <h5 class="mb-3 text-muted">Responsáveis e Status</h5>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="diretor_cpf" class="form-label">Diretor(a)</label>
+                    <select class="form-select" name="diretor_cpf" id="diretor_cpf">
+                        <option value="">-- Selecione um servidor --</option>
+                        {% for s in servidores %}
+                        <option value="{{ s.cpf }}" {{ 'selected' if escola and escola.diretor_cpf == s.cpf }}>{{ s.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="responsavel_merenda_cpf" class="form-label">Responsável pela Merenda</label>
+                    <select class="form-select" name="responsavel_merenda_cpf" id="responsavel_merenda_cpf">
+                        <option value="">-- Selecione um servidor --</option>
+                        {% for s in servidores %}
+                        <option value="{{ s.cpf }}" {{ 'selected' if escola and escola.responsavel_merenda_cpf == s.cpf }}>{{ s.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                 <div class="col-md-4">
+                    <label for="status" class="form-label">Status*</label>
+                    <select class="form-select" name="status" id="status" required>
+                        <option value="Ativa" {{ 'selected' if escola and escola.status == 'Ativa' }}>Ativa</option>
+                        <option value="Inativa" {{ 'selected' if escola and escola.status == 'Inativa' }}>Inativa</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            <a href="{{ url_for('merenda.listar_escolas') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle-fill"></i> Salvar</button>
+        </div>
+    </div>
+</form>
+{% endblock %}escolas_form.html

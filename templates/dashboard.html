@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+        <span class="text-muted">
+            {% if session.get('role') == 'admin' %}
+                Visão Geral - 
+                <strong class="text-primary">{{ secretaria_selecionada.nome if secretaria_selecionada else 'Todas as Secretarias' }}</strong>
+            {% else %}
+                Visão Geral da Secretaria: <strong class="text-primary">{{ session.get('secretaria') }}</strong>
+            {% endif %}
+        </span>
+    </div>
+</div>
+{% if session.get('role') == 'admin' %}
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('dashboard') }}">
+            <div class="row align-items-end">
+                <div class="col-md-4">
+                    <label for="secretaria_id" class="form-label fw-bold">Filtrar por Secretaria</label>
+                    <select name="secretaria_id" id="secretaria_id" class="form-select">
+                        <option value="">-- Ver Todas as Secretarias --</option>
+                        {% for sec in secretarias %}
+                        <option value="{{ sec.id }}" {% if secretaria_selecionada and secretaria_selecionada.id == sec.id %}selected{% endif %}>
+                            {{ sec.nome }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel-fill"></i> Filtrar</button>
+                </div>
+                 <div class="col-md-2">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary w-100"><i class="bi bi-arrow-clockwise"></i> Limpar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-white bg-primary shadow h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-people-fill"></i> Total de Servidores</h5>
+                <p class="card-text fs-2 fw-bold">{{ total_servidores }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-white bg-success shadow h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-cash-coin"></i> Média Salarial</h5>
+                <p class="card-text fs-2 fw-bold">R$ {{ '%.2f'|format(remuneracao_media)|replace('.', ',') if remuneracao_media else '0,00' }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-white bg-info shadow h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-briefcase-fill"></i> Total de Funções</h5>
+                <p class="card-text fs-2 fw-bold">{{ funcao_labels|length }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-white bg-warning shadow h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-fuel-pump-fill"></i> Combustível (Ano)</h5>
+                <p class="card-text fs-2 fw-bold">{{ "%.0f"|format(total_litros_ano) }} L</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5><i class="bi bi-bar-chart-line-fill"></i> Consumo Mensal de Combustível ({{ ano_atual }})</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="combustivelChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5><i class="bi bi-pie-chart-fill"></i> Distribuição por Função</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="funcaoChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5><i class="bi bi-bar-chart-fill"></i> Distribuição por Lotação</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="lotacaoChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if servidores_incompletos %}
+{% endif %}
+{% if contratos_a_vencer %}
+{% endif %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // SCRIPT PARA O NOVO GRÁFICO DE COMBUSTÍVEL
+    const ctxCombustivel = document.getElementById('combustivelChart');
+    if (ctxCombustivel) {
+        new Chart(ctxCombustivel, {
+            type: 'bar',
+            data: {
+                labels: {{ combustivel_labels|tojson }},
+                datasets: [{
+                    label: 'Litros Consumidos',
+                    data: {{ combustivel_data|tojson }},
+                    backgroundColor: 'rgba(255, 193, 7, 0.6)',
+                    borderColor: 'rgba(255, 193, 7, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // SCRIPT PARA O GRÁFICO DE FUNÇÕES
+    const ctxFuncao = document.getElementById('funcaoChart');
+    if (ctxFuncao) {
+        new Chart(ctxFuncao, {
+            type: 'doughnut',
+            data: {
+                labels: {{ funcao_labels|tojson }},
+                datasets: [{
+                    label: 'Nº de Servidores',
+                    data: {{ funcao_data|tojson }},
+                    backgroundColor: ['#0d6efd', '#6c757d', '#198754', '#dc3545', '#ffc107', '#0dcaf0'],
+                    hoverOffset: 4
+                }]
+            }
+        });
+    }
+
+    // SCRIPT PARA O GRÁFICO DE LOTAÇÕES
+    const ctxLotacao = document.getElementById('lotacaoChart');
+    if (ctxLotacao) {
+        new Chart(ctxLotacao, {
+            type: 'bar',
+            data: {
+                labels: {{ lotacao_labels|tojson }},
+                datasets: [{
+                    label: 'Nº de Servidores',
+                    data: {{ lotacao_data|tojson }},
+                    backgroundColor: 'rgba(0, 77, 64, 0.6)',
+                    borderColor: 'rgba(0, 77, 64, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true } }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

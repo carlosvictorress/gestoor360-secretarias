@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}Novo Requerimento{% endblock %}
+
+{% block content %}
+<h2>Novo Requerimento</h2>
+<p class="text-muted">Preencha o formulário abaixo para registrar um novo requerimento. Comece digitando o CPF para carregar os dados do servidor.</p>
+
+<form method="POST" class="mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5>1. Identificação do Servidor</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="cpf_busca" class="form-label">CPF do Servidor*</label>
+                    <input type="text" class="form-control" id="cpf_busca" name="cpf_busca" required>
+                    <div id="cpf-error" class="text-danger mt-1 small" style="display: none;"></div>
+                </div>
+                <div class="col-md-8">
+                    <label for="autoridade_dirigida" class="form-label">Autoridade a quem é dirigida*</label>
+                    <input type="text" class="form-control" id="autoridade_dirigida" name="autoridade_dirigida" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-12"><label>Nome Completo:</label><input type="text" id="nome" class="form-control" readonly></div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4"><label>Cargo/Função:</label><input type="text" id="funcao" class="form-control" readonly></div>
+                <div class="col-md-4"><label>Classe/Nível:</label><input type="text" id="classe_nivel" class="form-control" readonly></div>
+                <div class="col-md-4"><label>Data de Admissão:</label><input type="date" id="data_admissao" name="data_admissao" class="form-control"></div>
+            </div>
+            <div class="row mb-3">
+                 <div class="col-md-4"><label>Lotação:</label><input type="text" id="lotacao" class="form-control" readonly></div>
+                 <div class="col-md-4"><label>Nº Contra-cheque:</label><input type="text" id="num_contra_cheque" class="form-control" readonly></div>
+                 <div class="col-md-4"><label>Telefone:</label><input type="text" id="telefone" class="form-control" readonly></div>
+            </div>
+             <div class="row mb-3">
+                 <div class="col-md-12"><label>Endereço:</label><input type="text" id="endereco" class="form-control" readonly></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header">
+            <h5>2. Detalhes do Requerimento</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-5">
+                    <label for="natureza" class="form-label">Natureza do Requerimento*</label>
+                    <select class="form-select" id="natureza" name="natureza" required>
+                        <option value="" selected disabled>-- Selecione uma opção --</option>
+                        <option value="Férias">Férias</option>
+                        <option value="Licença Maternidade">Licença Maternidade</option>
+                        <option value="Licença Premium">Licença Prêmio</option>
+                        <option value="Afastamento Médico">Afastamento Médico</option>
+                        <option value="Pedido de Aposentadoria">Pedido de Aposentadoria</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div class="col-md-7" id="outro_campo_div" style="display: none;">
+                    <label for="natureza_outro" class="form-label">Especifique a natureza*</label>
+                    <input type="text" class="form-control" id="natureza_outro" name="natureza_outro">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="data_inicio_requerimento" class="form-label">Início do Requerimento*</label>
+                    <input type="date" class="form-control" id="data_inicio_requerimento" name="data_inicio_requerimento" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="duracao" class="form-label">Duração (em dias)</label>
+                    <input type="text" class="form-control" id="duracao" name="duracao">
+                </div>
+                <div class="col-md-4">
+                    <label for="periodo_aquisitivo" class="form-label">Período Aquisitivo (Ex: 2023/2024)</label>
+                    <input type="text" class="form-control" id="periodo_aquisitivo" name="periodo_aquisitivo">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="informacoes_complementares" class="form-label">Informações Complementares</label>
+                <textarea class="form-control" id="informacoes_complementares" name="informacoes_complementares" rows="4"></textarea>
+            </div>
+             <div class="mb-3">
+                <label for="parecer_juridico" class="form-label">Parecer Jurídico</label>
+                <textarea class="form-control" id="parecer_juridico" name="parecer_juridico" rows="4"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('listar_requerimentos') }}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-success">Salvar Requerimento</button>
+    </div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cpfInput = document.getElementById('cpf_busca');
+    const naturezaSelect = document.getElementById('natureza');
+    const outroDiv = document.getElementById('outro_campo_div');
+    const outroInput = document.getElementById('natureza_outro');
+    const errorDiv = document.getElementById('cpf-error');
+
+    // Função para limpar os campos
+    function limparCampos() {
+        document.getElementById('nome').value = '';
+        document.getElementById('funcao').value = '';
+        document.getElementById('classe_nivel').value = '';
+        document.getElementById('data_admissao').value = '';
+        document.getElementById('lotacao').value = '';
+        document.getElementById('num_contra_cheque').value = '';
+        document.getElementById('telefone').value = '';
+        document.getElementById('endereco').value = '';
+    }
+
+    // Lógica para mostrar/ocultar o campo "Outro"
+    naturezaSelect.addEventListener('change', function() {
+        if (this.value === 'Outro') {
+            outroDiv.style.display = 'block';
+            outroInput.required = true;
+        } else {
+            outroDiv.style.display = 'none';
+            outroInput.required = false;
+        }
+    });
+
+    // Lógica para buscar e preencher dados do servidor
+    cpfInput.addEventListener('blur', function() {
+        const cpf = this.value;
+        if (cpf.length >= 11) {
+            fetch(`/api/servidor/${cpf}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.error || 'Erro desconhecido') });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    errorDiv.style.display = 'none';
+                    errorDiv.textContent = '';
+                    cpfInput.classList.remove('is-invalid');
+                    // Preenche os campos do formulário
+                    document.getElementById('nome').value = data.nome || '';
+                    document.getElementById('funcao').value = data.funcao || '';
+                    document.getElementById('classe_nivel').value = data.classe_nivel || '';
+                    document.getElementById('data_admissao').value = data.data_admissao || '';
+                    document.getElementById('lotacao').value = data.lotacao || '';
+                    document.getElementById('num_contra_cheque').value = data.num_contra_cheque || '';
+                    document.getElementById('telefone').value = data.telefone || '';
+                    document.getElementById('endereco').value = data.endereco || '';
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar servidor:', error);
+                    errorDiv.textContent = error.message;
+                    errorDiv.style.display = 'block';
+                    cpfInput.classList.add('is-invalid');
+                    limparCampos();
+                });
+        }
+    });
+});
+</script>
+{% endblock %}

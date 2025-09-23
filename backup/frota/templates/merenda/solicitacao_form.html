@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova Solicitação de Merenda{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-card-list"></i> Nova Solicitação de Merenda Escolar</h2>
+<hr>
+
+<form method="POST" id="solicitacaoForm">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5>Dados da Solicitação</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="escola_id" class="form-label">Escola Solicitante*</label>
+                    <select class="form-select" name="escola_id" id="escola_id" required>
+                        <option value="">-- Selecione a escola --</option>
+                        {% for e in escolas %}
+                        <option value="{{ e.id }}">{{ e.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="solicitante_cpf" class="form-label">Servidor Solicitante*</label>
+                    <select class="form-select" name="solicitante_cpf" id="solicitante_cpf" required>
+                        <option value="">-- Selecione o servidor responsável --</option>
+                         {% for s in servidores %}
+                        <option value="{{ s.cpf }}">{{ s.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Itens Solicitados</h5>
+                <button type="button" class="btn btn-sm btn-success" id="addItem"><i class="bi bi-plus-circle"></i> Adicionar Item</button>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 60%;">Produto</th>
+                        <th>Quantidade</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="itensContainer">
+                    </tbody>
+            </table>
+        </div>
+        <div class="card-footer text-end">
+            <a href="{{ url_for('merenda.listar_produtos') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-send-fill"></i> Enviar Solicitação</button>
+        </div>
+    </div>
+</form>
+
+<template id="itemTemplate">
+    <tr>
+        <td>
+            <select class="form-select" name="produto_id[]" required>
+                <option value="">-- Selecione um produto --</option>
+                {% for p in produtos %}
+                <option value="{{ p.id }}">{{ p.nome }} (Estoque: {{ p.estoque_atual }} {{ p.unidade_medida }})</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <input type="text" class="form-control" name="quantidade[]" required placeholder="Qtd.">
+        </td>
+        <td>
+            <button type="button" class="btn btn-sm btn-danger removeItem"><i class="bi bi-trash-fill"></i></button>
+        </td>
+    </tr>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const addItemBtn = document.getElementById('addItem');
+    const container = document.getElementById('itensContainer');
+    const template = document.getElementById('itemTemplate');
+
+    function addNewItem() {
+        const clone = template.content.cloneNode(true);
+        container.appendChild(clone);
+    }
+
+    // Adicionar a primeira linha ao carregar a página
+    addNewItem();
+
+    // Adicionar nova linha ao clicar no botão
+    addItemBtn.addEventListener('click', addNewItem);
+
+    // Remover linha ao clicar no botão de lixeira
+    container.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('removeItem')) {
+            e.target.closest('tr').remove();
+        }
+    });
+});
+</script>
+
+{% endblock %}

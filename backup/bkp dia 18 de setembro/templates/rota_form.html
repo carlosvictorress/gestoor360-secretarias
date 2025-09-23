@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if rota.id %}Editar Rota{% else %}Cadastrar Nova Rota{% endif %}{% endblock %}
+
+{% block content %}
+<h2>
+    {% if rota.id %}
+        <i class="bi bi-pencil-fill"></i> Editar Rota #{{ rota.id }}
+    {% else %}
+        <i class="bi bi-plus-circle-fill"></i> Cadastro de Nova Rota
+    {% endif %}
+</h2>
+<p class="text-muted">Preencha os detalhes da rota, incluindo os responsáveis e o itinerário desenhado no mapa.</p>
+
+<form method="POST" class="mt-4">
+    <input type="hidden" id="coordenadas_manha" name="coordenadas_manha" value="{{ rota.coordenadas_manha or '' }}">
+    <input type="hidden" id="coordenadas_tarde" name="coordenadas_tarde" value="{{ rota.coordenadas_tarde or '' }}">
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h5>1. Responsáveis e Veículo</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="motorista_cpf" class="form-label">Motorista*</label>
+                    <select id="motorista_cpf" name="motorista_cpf" class="form-select" required>
+                        <option value="" disabled {% if not rota.id %}selected{% endif %}>-- Selecione um motorista --</option>
+                        {% for motorista in motoristas %}
+                        <option value="{{ motorista.cpf }}" {% if rota.motorista_cpf == motorista.cpf %}selected{% endif %}>{{ motorista.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="veiculo_placa" class="form-label">Veículo*</label>
+                    <select id="veiculo_placa" name="veiculo_placa" class="form-select" required>
+                        <option value="" disabled {% if not rota.id %}selected{% endif %}>-- Selecione um veículo --</option>
+                        {% for veiculo in veiculos %}
+                        <option value="{{ veiculo.placa }}" {% if rota.veiculo_placa == veiculo.placa %}selected{% endif %}>{{ veiculo.modelo }} ({{ veiculo.placa }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="monitor_cpf" class="form-label">Monitor (Opcional)</label>
+                    <select id="monitor_cpf" name="monitor_cpf" class="form-select">
+                        <option value="">-- Nenhum monitor --</option>
+                        {% for monitor in motoristas %}
+                        <option value="{{ monitor.cpf }}" {% if rota.monitor_cpf == monitor.cpf %}selected{% endif %}>{{ monitor.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-header">
+            <h5>2. Itinerário e Mapa</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 border-end">
+                    <h5 class="text-warning"><i class="bi bi-brightness-high-fill"></i> Turno da Manhã</h5>
+                    <div class="mb-3">
+                        <label for="escolas_manha" class="form-label">Escolas (separadas por vírgula)</label>
+                        <input type="text" id="escolas_manha" name="escolas_manha" class="form-control" value="{{ rota.escolas_manha or '' }}">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6"><label class="form-label">Horário de Saída</label><input type="time" name="horario_saida_manha" class="form-control" value="{{ rota.horario_saida_manha.strftime('%H:%M') if rota.horario_saida_manha }}"></div>
+                        <div class="col-6"><label class="form-label">Horário de Volta</label><input type="time" name="horario_volta_manha" class="form-control" value="{{ rota.horario_volta_manha.strftime('%H:%M') if rota.horario_volta_manha }}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Quilometragem de Ida (Manhã)</h6>
+                        <table class="table table-sm">
+                            <tbody id="km-ida-manha-container">
+                                {% for trecho in trechos_ida_manha %}{% include 'trecho_rota_item.html' %}{% endfor %}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-sm btn-outline-secondary add-trecho" data-container="km-ida-manha-container" data-template="trecho-ida-manha-template">Adicionar Trecho de Ida</button>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Quilometragem de Volta (Manhã)</h6>
+                        <table class="table table-sm">
+                            <tbody id="km-volta-manha-container">
+                                {% for trecho in trechos_volta_manha %}{% include 'trecho_rota_item.html' %}{% endfor %}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-sm btn-outline-secondary add-trecho" data-container="km-volta-manha-container" data-template="trecho-volta-manha-template">Adicionar Trecho de Volta</button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-primary"><i class="bi bi-brightness-alt-high-fill"></i> Turno da Tarde</h5>
+                    <div class="mb-3">
+                        <label for="escolas_tarde" class="form-label">Escolas (separadas por vírgula)</label>
+                        <input type="text" id="escolas_tarde" name="escolas_tarde" class="form-control" value="{{ rota.escolas_tarde or '' }}">
+                    </div>
+                     <div class="row mb-3">
+                        <div class="col-6"><label class="form-label">Horário de Saída</label><input type="time" name="horario_saida_tarde" class="form-control" value="{{ rota.horario_saida_tarde.strftime('%H:%M') if rota.horario_saida_tarde }}"></div>
+                        <div class="col-6"><label class="form-label">Horário de Volta</label><input type="time" name="horario_volta_tarde" class="form-control" value="{{ rota.horario_volta_tarde.strftime('%H:%M') if rota.horario_volta_tarde }}"></div>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Quilometragem de Ida (Tarde)</h6>
+                        <table class="table table-sm">
+                            <tbody id="km-ida-tarde-container">
+                                {% for trecho in trechos_ida_tarde %}{% include 'trecho_rota_item.html' %}{% endfor %}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-sm btn-outline-secondary add-trecho" data-container="km-ida-tarde-container" data-template="trecho-ida-tarde-template">Adicionar Trecho de Ida</button>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Quilometragem de Volta (Tarde)</h6>
+                        <table class="table table-sm">
+                            <tbody id="km-volta-tarde-container">
+                                {% for trecho in trechos_volta_tarde %}{% include 'trecho_rota_item.html' %}{% endfor %}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-sm btn-outline-secondary add-trecho" data-container="km-volta-tarde-container" data-template="trecho-volta-tarde-template">Adicionar Trecho de Volta</button>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <p class="text-muted">Use as ferramentas no canto esquerdo do mapa para desenhar o trajeto.</p>
+            <div id="map" style="height: 500px;"></div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('transporte.listar_rotas') }}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">Salvar Rota</button>
+    </div>
+</form>
+
+<template id="trecho-ida-manha-template">
+    <tr>
+        <td><input type="text" class="form-control form-control-sm" name="descricao_ida_manha[]" placeholder="Descrição do trecho (opcional)"></td>
+        <td style="width: 120px;"><input type="number" step="0.1" class="form-control form-control-sm" name="distancia_ida_manha[]" placeholder="KM" required></td>
+        <td style="width: 50px;"><button type="button" class="btn btn-sm btn-danger remove-trecho"><i class="bi bi-trash"></i></button></td>
+    </tr>
+</template>
+<template id="trecho-volta-manha-template">
+    <tr>
+        <td><input type="text" class="form-control form-control-sm" name="descricao_volta_manha[]" placeholder="Descrição do trecho (opcional)"></td>
+        <td style="width: 120px;"><input type="number" step="0.1" class="form-control form-control-sm" name="distancia_volta_manha[]" placeholder="KM" required></td>
+        <td style="width: 50px;"><button type="button" class="btn btn-sm btn-danger remove-trecho"><i class="bi bi-trash"></i></button></td>
+    </tr>
+</template>
+<template id="trecho-ida-tarde-template">
+    <tr>
+        <td><input type="text" class="form-control form-control-sm" name="descricao_ida_tarde[]" placeholder="Descrição do trecho (opcional)"></td>
+        <td style="width: 120px;"><input type="number" step="0.1" class="form-control form-control-sm" name="distancia_ida_tarde[]" placeholder="KM" required></td>
+        <td style="width: 50px;"><button type="button" class="btn btn-sm btn-danger remove-trecho"><i class="bi bi-trash"></i></button></td>
+    </tr>
+</template>
+<template id="trecho-volta-tarde-template">
+    <tr>
+        <td><input type="text" class="form-control form-control-sm" name="descricao_volta_tarde[]" placeholder="Descrição do trecho (opcional)"></td>
+        <td style="width: 120px;"><input type="number" step="0.1" class="form-control form-control-sm" name="distancia_volta_tarde[]" placeholder="KM" required></td>
+        <td style="width: 50px;"><button type="button" class="btn btn-sm btn-danger remove-trecho"><i class="bi bi-trash"></i></button></td>
+    </tr>
+</template>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- LÓGICA DO MAPA (sem alterações) ---
+    var map = L.map('map').setView([-6.405, -41.745], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    var drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+    var drawControl = new L.Control.Draw({ edit: { featureGroup: drawnItems }, draw: { polygon: false, rectangle: false, circle: false, marker: false, circlemarker: false, polyline: { shapeOptions: { color: '#f357a1' } } } });
+    map.addControl(drawControl);
+    function loadPolyline(coordsJson, color, turno) { if (coordsJson && coordsJson !== '[]') { try { var coords = JSON.parse(coordsJson); var polyline = L.polyline(coords, { color: color }); polyline.turno = turno; drawnItems.addLayer(polyline); map.fitBounds(polyline.getBounds()); } catch (e) { console.error("Erro ao carregar coordenadas:", e); } } }
+    loadPolyline(document.getElementById('coordenadas_manha').value, 'orange', 'manha');
+    loadPolyline(document.getElementById('coordenadas_tarde').value, 'blue', 'tarde');
+    map.on(L.Draw.Event.CREATED, function (event) { var layer = event.layer; var latlngs = layer.getLatLngs().map(latlng => [latlng.lat, latlng.lng]); var turno = prompt("Esta rota é para o turno da MANHÃ ou TARDE?", "manha").toLowerCase(); if (turno === 'manha') { document.getElementById('coordenadas_manha').value = JSON.stringify(latlngs); layer.setStyle({ color: 'orange' }); layer.turno = 'manha'; } else if (turno === 'tarde') { document.getElementById('coordenadas_tarde').value = JSON.stringify(latlngs); layer.setStyle({ color: 'blue' }); layer.turno = 'tarde'; } else { alert("Turno inválido."); return; } drawnItems.addLayer(layer); });
+    map.on(L.Draw.Event.EDITED, function (event) { event.layers.eachLayer(function (layer) { var latlngs = layer.getLatLngs().map(latlng => [latlng.lat, latlng.lng]); if (layer.turno === 'manha') { document.getElementById('coordenadas_manha').value = JSON.stringify(latlngs); } else if (layer.turno === 'tarde') { document.getElementById('coordenadas_tarde').value = JSON.stringify(latlngs); } }); });
+    map.on(L.Draw.Event.DELETED, function (event) { event.layers.eachLayer(function (layer) { if (layer.turno === 'manha') { document.getElementById('coordenadas_manha').value = ''; } else if (layer.turno === 'tarde') { document.getElementById('coordenadas_tarde').value = ''; } }); });
+
+    // --- NOVA LÓGICA PARA ADICIONAR/REMOVER TRECHOS DE KM ---
+    document.querySelectorAll('.add-trecho').forEach(button => {
+        button.addEventListener('click', function() {
+            const containerId = this.dataset.container;
+            const templateId = this.dataset.template;
+            const container = document.getElementById(containerId);
+            const template = document.getElementById(templateId);
+            const clone = template.content.cloneNode(true);
+            container.appendChild(clone);
+        });
+    });
+
+    document.querySelector('form').addEventListener('click', function(e) {
+        if (e.target && e.target.closest('.remove-trecho')) {
+            e.target.closest('tr').remove();
+        }
+    });
+});
+</script>
+{% endblock %}

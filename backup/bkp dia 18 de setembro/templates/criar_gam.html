@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h3>GUIA PARA ATENDIMENTO MÉDICO - GAM</h3>
+        <h6>PREFEITURA MUNICIPAL DE VALENÇA DO PIAUÍ</h6>
+    </div>
+    <hr>
+
+    <form method="POST" class="mt-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                1 - Dados do Servidor
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label for="servidor_num_contrato">NOME DO SERVIDOR:</label>
+                        <select name="servidor_num_contrato" id="servidor_num_contrato" class="form-control" required>
+                            <option value="">Selecione um servidor...</option>
+                            {% for s in servidores %}
+                            <option value="{{ s.num_contrato }}">{{ s.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label for="matricula">MATRÍCULA N.:</label>
+                        <input type="text" id="matricula" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label for="lotacao">LOTAÇÃO:</label>
+                        <input type="text" id="lotacao" class="form-control" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                2 - OBSERVAÇÕES DA CHEFIA (ESPECIFICAR A DESCRIÇÃO DO CARGO/FUNÇÃO)
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <textarea name="texto_inicial_observacoes" id="texto_inicial_observacoes" class="form-control" rows="3"
+                        placeholder="Ex: A requerente é efetiva da rede municipal de ensino, tendo sido admitida em 03/11/1997 para a função Auxiliar de Serviços Gerais..."></textarea>
+                </div>
+                <hr>
+                <p class="text-muted">Na declaração médica,</p>
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-right">datada do dia</div>
+                    <div class="col-md-3">
+                        <input type="date" name="data_laudo" class="form-control" required>
+                    </div>
+                    <div class="col-md-2 text-right">, o(a) médico(a)</div>
+                    <div class="col-md-5">
+                        <input type="text" name="medico_laudo" class="form-control" placeholder="Ex: psiquiatra" required>
+                    </div>
+                </div>
+
+                <div class="row align-items-center mt-2">
+                    <div class="col-md-2 text-right">recomenda</div>
+                    <div class="col-md-2">
+                        <input type="number" name="dias_afastamento_laudo" class="form-control" placeholder="Ex: 90" required>
+                    </div>
+                    <div class="col-md-8">dias de afastamento das suas atividades laborais, pois declara que</div>
+                </div>
+
+                <div class="form-group mt-2">
+                     <textarea name="justificativa_laudo" class="form-control" rows="2"
+                        placeholder="Ex: a servidora se encontra em episódio de mania do quadro de transtorno afetivo de bipolaridade." required></textarea>
+                </div>
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-3 form-group">
+                        <label for="cid10">CID 10:</label>
+                        <input type="text" name="cid10" id="cid10" class="form-control" value="F31.1">
+                    </div>
+                </div>
+                
+                <p>Desse modo, encaminho o(a) servidor(a) <strong id="nome_encaminhamento">[NOME DO SERVIDOR]</strong> para perícia médica do município.</p>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">Gerar Guia</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('servidor_num_contrato').addEventListener('change', function() {
+        const numContrato = this.value;
+        const matriculaInput = document.getElementById('matricula');
+        const lotacaoInput = document.getElementById('lotacao');
+        const nomeEncaminhamento = document.getElementById('nome_encaminhamento');
+        const textoInicial = document.getElementById('texto_inicial_observacoes');
+
+        if (!numContrato) {
+            matriculaInput.value = '';
+            lotacaoInput.value = '';
+            nomeEncaminhamento.textContent = '[NOME DO SERVIDOR]';
+            textoInicial.value = '';
+            return;
+        }
+
+        // Faz uma chamada à API que criamos para buscar os detalhes do servidor
+        fetch(`/api/servidor-details/${numContrato}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+                matriculaInput.value = data.matricula || '';
+                lotacaoInput.value = data.lotacao || '';
+                nomeEncaminhamento.textContent = data.nome || '[NOME DO SERVIDOR]';
+                // Preenche o texto inicial com um modelo
+                textoInicial.value = `A requerente é efetiva da rede municipal de ensino, tendo sido admitida em ${data.data_admissao || '[data de admissão]'} para a função ${data.funcao || '[função]'}, lotada atualmente no ${data.lotacao || '[lotação]'}.`;
+            });
+    });
+</script>
+
+{% endblock %}

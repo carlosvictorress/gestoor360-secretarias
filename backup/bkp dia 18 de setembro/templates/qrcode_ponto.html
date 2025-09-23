@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Code para Ponto Eletrônico{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h2><i class="bi bi-qr-code"></i> QR Code para Registro de Ponto</h2>
+    <p class="lead">Exiba este QR Code na entrada ou imprima para que os servidores possam registrar o ponto.</p>
+    <hr>
+    <div class="bg-white p-4 d-inline-block shadow-sm">
+        {% if qr_code_image %}
+            <img src="data:image/png;base64,{{ qr_code_image }}" alt="QR Code de Ponto" class="img-fluid">
+        {% else %}
+            <p class="text-danger">Não foi possível gerar o QR Code.</p>
+        {% endif %}
+    </div>
+    <div class="mt-4">
+        <button class="btn btn-primary" onclick="window.print();"><i class="bi bi-printer-fill"></i> Imprimir QR Code</button>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Protocolos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-table"></i> Protocolos Registados</h2>
+    <a href="{{ url_for('protocolo.novo_protocolo') }}" class="btn btn-primary"><i class="bi bi-plus-circle-fill"></i> Novo Protocolo</a>
+</div>
+
+<!-- NOVO: Formulário de Pesquisa -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-search"></i> Pesquisar Protocolos</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('protocolo.listar_protocolos') }}">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label for="q_numero" class="form-label">Nº Protocolo</label>
+                    <input type="text" class="form-control" id="q_numero" name="q_numero" value="{{ q_numero or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="q_interessado" class="form-label">Interessado</label>
+                    <input type="text" class="form-control" id="q_interessado" name="q_interessado" value="{{ q_interessado or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="q_assunto" class="form-label">Assunto</label>
+                    <input type="text" class="form-control" id="q_assunto" name="q_assunto" value="{{ q_assunto or '' }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="q_status" class="form-label">Status</label>
+                    <select id="q_status" name="q_status" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="Aberto" {% if q_status == 'Aberto' %}selected{% endif %}>Aberto/Recebido</option>
+                        <option value="Em Tramitação" {% if q_status == 'Em Tramitação' %}selected{% endif %}>Em Tramitação</option>
+                        <option value="Finalizado" {% if q_status == 'Finalizado' %}selected{% endif %}>Finalizado</option>
+                        <option value="Cancelado" {% if q_status == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-3 text-end">
+                <a href="{{ url_for('protocolo.listar_protocolos') }}" class="btn btn-secondary">Limpar Filtros</a>
+                <button type="submit" class="btn btn-primary">Pesquisar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nº Protocolo</th>
+                        <th>Assunto</th>
+                        <th>Interessado</th>
+                        <th>Data de Abertura</th>
+                        <th>Setor Atual</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in protocolos %}
+                    <tr>
+                        <td><strong>{{ p.numero_protocolo }}</strong></td>
+                        <td>{{ p.assunto }}</td>
+                        <td>{{ p.interessado }}</td>
+                        <td>{{ p.data_criacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ p.setor_atual }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if p.status == 'Aberto' %} bg-info text-dark
+                                {% elif p.status == 'Em Tramitação' %} bg-warning text-dark
+                                {% elif p.status == 'Finalizado' %} bg-success
+                                {% elif p.status == 'Cancelado' %} bg-danger
+                                {% else %} bg-secondary {% endif %}">
+                                {{ p.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('protocolo.detalhes_protocolo', protocolo_id=p.id) }}" class="btn btn-sm btn-info" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                            <a href="{{ url_for('protocolo.imprimir_comprovante', protocolo_id=p.id) }}" target="_blank" class="btn btn-sm btn-secondary" title="Imprimir Comprovante"><i class="bi bi-printer-fill"></i></a>
+                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#statusModal"
+                                    data-protocolo-id="{{ p.id }}"
+                                    data-status-atual="{{ p.status }}"
+                                    title="Mudar Status">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">Nenhum protocolo encontrado para os critérios de pesquisa.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Alteração de Status -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="statusModalLabel">Alterar Status do Protocolo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="statusForm" method="POST" action="{{ url_for('protocolo.mudar_status_protocolo') }}">
+        <div class="modal-body">
+            <input type="hidden" name="protocolo_id" id="modal_protocolo_id">
+            <div class="mb-3">
+                <label for="novo_status" class="form-label">Novo Status*</label>
+                <select class="form-select" id="novo_status" name="novo_status" required>
+                    <option value="Aberto">Aberto/Recebido</option>
+                    <option value="Em Tramitação">Em Tramitação</option>
+                    <option value="Finalizado">Finalizado</option>
+                    <option value="Cancelado">Cancelado</option>
+                </select>
+            </div>
+            <div class="mb-3" id="motivo-cancelamento-div" style="display: none;">
+                <label for="motivo_cancelamento" class="form-label">Motivo do Cancelamento*</label>
+                <textarea class="form-control" id="motivo_cancelamento" name="motivo_cancelamento" rows="3"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Alteração</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var statusModal = document.getElementById('statusModal');
+    if (statusModal) {
+        var statusSelect = document.getElementById('novo_status');
+        var motivoDiv = document.getElementById('motivo-cancelamento-div');
+        var motivoTextarea = document.getElementById('motivo_cancelamento');
+
+        statusSelect.addEventListener('change', function() {
+            if (this.value === 'Cancelado') {
+                motivoDiv.style.display = 'block';
+                motivoTextarea.required = true;
+            } else {
+                motivoDiv.style.display = 'none';
+                motivoTextarea.required = false;
+            }
+        });
+
+        statusModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var protocoloId = button.getAttribute('data-protocolo-id');
+            var statusAtual = button.getAttribute('data-status-atual');
+            var modalProtocoloIdInput = statusModal.querySelector('#modal_protocolo_id');
+            
+            modalProtocoloIdInput.value = protocoloId;
+            statusSelect.value = statusAtual;
+            statusSelect.dispatchEvent(new Event('change'));
+        });
+    }
+});
+</script>
+{% endblock %}

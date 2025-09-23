@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes da Solicitação #{{ solicitacao.id }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-file-earmark-text"></i> Detalhes da Solicitação #{{ solicitacao.id }}</h2>
+    <a href="{{ url_for('merenda.painel_solicitacoes') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar ao Painel</a>
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5>Itens Solicitados</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for item in solicitacao.itens %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ item.produto.nome }}
+                        <span class="badge bg-primary rounded-pill">{{ item.quantidade_solicitada }} {{ item.produto.unidade_medida }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5>Informações e Ações</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Escola:</strong> {{ solicitacao.escola.nome }}</p>
+                <p><strong>Data do Pedido:</strong> {{ solicitacao.data_solicitacao.strftime('%d/%m/%Y %H:%M') }}</p>
+                <p><strong>Solicitante:</strong> {{ solicitacao.solicitante.nome if solicitacao.solicitante else 'N/A' }}</p>
+                <hr>
+                <p><strong>Status:</strong>
+                    <span class="badge fs-6
+                        {% if solicitacao.status == 'Pendente' %} bg-warning text-dark
+                        {% elif solicitacao.status == 'Autorizada' %} bg-info text-dark
+                        {% elif solicitacao.status == 'Entregue' %} bg-success
+                        {% else %} bg-secondary {% endif %}">
+                        {{ solicitacao.status }}
+                    </span>
+                </p>
+
+                {% if solicitacao.status == 'Pendente' %}
+                <form action="{{ url_for('merenda.autorizar_solicitacao', solicitacao_id=solicitacao.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label for="autorizador_cpf" class="form-label">Autorizado por:*</label>
+                        <select class="form-select" name="autorizador_cpf" required>
+                            <option value="">-- Selecione o servidor --</option>
+                            {% for s in servidores %}<option value="{{ s.cpf }}">{{ s.nome }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-info w-100"><i class="bi bi-check2-circle"></i> Autorizar Pedido</button>
+                </form>
+                {% elif solicitacao.status == 'Autorizada' %}
+                <p><strong>Autorizado por:</strong> {{ solicitacao.autorizador.nome if solicitacao.autorizador else 'N/A' }}</p>
+                <hr>
+                <form action="{{ url_for('merenda.detalhes_solicitacao', solicitacao_id=solicitacao.id) }}" method="POST">
+                    <input type="hidden" name="autorizador_cpf" value="{{ solicitacao.autorizador_cpf }}">
+                    <div class="mb-3">
+                        <label for="entregador_cpf" class="form-label">Entregue por:*</label>
+                         <select class="form-select" name="entregador_cpf" required>
+                            <option value="">-- Selecione o servidor --</option>
+                            {% for s in servidores %}<option value="{{ s.cpf }}">{{ s.nome }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100" onclick="return confirm('Atenção: Esta ação dará baixa no estoque e não pode ser desfeita. Deseja continuar?');"><i class="bi bi-truck"></i> Registrar Entrega e Baixar Estoque</button>
+                </form>
+                {% elif solicitacao.status == 'Entregue' %}
+                <p><strong>Autorizado por:</strong> {{ solicitacao.autorizador.nome if solicitacao.autorizador else 'N/A' }}</p>
+                <p><strong>Entregue por:</strong> {{ solicitacao.entregador.nome if solicitacao.entregador else 'N/A' }}</p>
+                <p><strong>Data da Entrega:</strong> {{ solicitacao.data_entrega.strftime('%d/%m/%Y %H:%M') }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

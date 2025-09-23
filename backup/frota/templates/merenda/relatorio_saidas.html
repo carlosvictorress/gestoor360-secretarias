@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório de Saídas de Estoque{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-file-earmark-bar-graph"></i> Relatório de Saídas de Estoque por Escola</h2>
+<hr>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="escola_id" class="form-label">Escola*</label>
+                    <select class="form-select" name="escola_id" id="escola_id" required>
+                        <option value="">-- Selecione uma escola --</option>
+                        {% for e in escolas %}
+                        <option value="{{ e.id }}" {{ 'selected' if e.id == escola_selecionada_id }}>{{ e.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="data_inicio" class="form-label">Data de Início*</label>
+                    <input type="date" class="form-control" name="data_inicio" value="{{ data_inicio or '' }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="data_fim" class="form-label">Data Final*</label>
+                    <input type="date" class="form-control" name="data_fim" value="{{ data_fim or '' }}" required>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-info w-100" title="Buscar"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if resultados is defined and resultados is not none %}
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Resultados da Busca</h5>
+        <a href="{{ url_for('merenda.relatorio_saidas', escola_id=escola_selecionada_id, data_inicio=data_inicio, data_fim=data_fim, gerar_pdf=True) }}" class="btn btn-danger" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Gerar PDF
+        </a>
+    </div>
+    <div class="card-body">
+        {% if resultados %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Data/Hora da Saída</th>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in resultados %}
+                    <tr>
+                        <td>{{ r.data_movimento.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ r.nome }}</td>
+                        <td>{{ r.quantidade }} {{ r.unidade_medida }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center text-muted">Nenhuma saída encontrada para os filtros selecionados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

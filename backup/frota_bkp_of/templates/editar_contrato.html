@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Contrato{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-pencil-square"></i> Editar Contrato Nº {{ contrato.numero }}</h2>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <p class="mb-0">Servidor: <strong>{{ contrato.servidor.nome }}</strong></p>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('contratos.editar_contrato', contrato_id=contrato.id) }}">
+            <div class="mb-3">
+                <label for="conteudo" class="form-label">Conteúdo do Contrato</label>
+                <p class="form-text">
+                    Atenção: Você está editando o texto bruto do contrato. As variáveis como nome do servidor, CPF, etc., já foram preenchidas e não serão atualizadas dinamicamente aqui.
+                </p>
+                <textarea class="form-control" id="conteudo" name="conteudo" rows="25" style="font-family: monospace; font-size: 14px;">{{ contrato.conteudo }}</textarea>
+            </div>
+            
+            <a href="{{ url_for('contratos.gerenciar_contratos') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

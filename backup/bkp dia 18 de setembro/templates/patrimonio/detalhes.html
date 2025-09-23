@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Item: {{ item.numero_patrimonio }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-archive"></i> Detalhes do Item: {{ item.descricao }}</h2>
+    <a href="{{ url_for('patrimonio.listar_itens') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar para a Lista</a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between">
+                <h5>Informações Gerais</h5>
+                <a href="{{ url_for('patrimonio.editar_item', item_id=item.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-fill"></i> Editar Informações</a>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Nº Patrimônio:</dt>
+                    <dd class="col-sm-8">{{ item.numero_patrimonio }}</dd>
+
+                    <dt class="col-sm-4">Descrição:</dt>
+                    <dd class="col-sm-8">{{ item.descricao }}</dd>
+                    
+                    <dt class="col-sm-4">Categoria:</dt>
+                    <dd class="col-sm-8">{{ item.categoria or 'Não informado' }}</dd>
+
+                    <dt class="col-sm-4">Data de Aquisição:</dt>
+                    <dd class="col-sm-8">{{ item.data_aquisicao.strftime('%d/%m/%Y') if item.data_aquisicao else 'Não informada' }}</dd>
+                    
+                    <dt class="col-sm-4">Valor de Aquisição:</dt>
+                    <dd class="col-sm-8">R$ {{ '%.2f'|format(item.valor_aquisicao)|replace('.', ',') if item.valor_aquisicao else 'Não informado' }}</dd>
+
+                    <dt class="col-sm-4">Observações:</dt>
+                    <dd class="col-sm-8">{{ item.observacoes or 'Nenhuma' }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5>Localização e Responsável</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Localização Atual:</strong><br>{{ item.localizacao }}</p>
+                <p><strong>Responsável Atual:</strong><br>{{ item.responsavel.nome if item.responsavel else 'Sem responsável específico' }}</p>
+                <p><strong>Status:</strong><br>
+                    <span class="badge fs-6
+                        {% if item.status == 'Ativo' %} bg-success
+                        {% elif item.status == 'Manutenção' %} bg-warning
+                        {% elif item.status == 'Baixado' %} bg-secondary
+                        {% else %} bg-info {% endif %}">
+                        {{ item.status }}
+                    </span>
+                </p>
+                <hr>
+                <button class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#transferModal"><i class="bi bi-arrows-move"></i> Transferir Item</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5><i class="bi bi-clock-history"></i> Histórico de Movimentações</h5>
+    </div>
+    <div class="card-body">
+        {% if movimentacoes %}
+        <ul class="list-group">
+            {% for mov in movimentacoes %}
+            <li class="list-group-item">
+                <p class="mb-1">
+                    <i class="bi bi-calendar-event"></i> <strong>Data:</strong> {{ mov.data_movimentacao.strftime('%d/%m/%Y %H:%M') }}
+                    | <i class="bi bi-person-check"></i> <strong>Registrado por:</strong> {{ mov.usuario_registro }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">DE</small>
+                        <p class="mb-0"><i class="bi bi-box-arrow-up-left"></i> <strong>Local:</strong> {{ mov.local_origem }}</p>
+                        <p class="mb-0"><i class="bi bi-person"></i> <strong>Responsável:</strong> {{ mov.responsavel_anterior.nome if mov.responsavel_anterior else 'N/A' }}</p>
+                    </div>
+                    <i class="bi bi-arrow-right-circle-fill fs-4 text-primary mx-3"></i>
+                    <div>
+                        <small class="text-muted">PARA</small>
+                        <p class="mb-0"><i class="bi bi-box-arrow-in-down-right"></i> <strong>Local:</strong> {{ mov.local_destino }}</p>
+                        <p class="mb-0"><i class="bi bi-person"></i> <strong>Responsável:</strong> {{ mov.responsavel_novo.nome if mov.responsavel_novo else 'N/A' }}</p>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">Nenhuma movimentação registrada para este item.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="transferModalLabel">Transferir Item: {{ item.descricao }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('patrimonio.transferir_item', item_id=item.id) }}" method="POST">
+          <div class="modal-body">
+            <p><strong>Origem:</strong> {{ item.localizacao }}</p>
+            <div class="mb-3">
+              <label for="local_destino" class="form-label">Novo Local*</label>
+              <input type="text" class="form-control" name="local_destino" id="local_destino" required>
+            </div>
+            <div class="mb-3">
+              <label for="servidor_responsavel_cpf" class="form-label">Novo Responsável (Opcional)</label>
+              <select class="form-select" name="servidor_responsavel_cpf" id="servidor_responsavel_cpf">
+                  <option value="">-- Sem responsável específico --</option>
+                  {% for s in servidores %}
+                  <option value="{{ s.cpf }}">{{ s.nome }}</option>
+                  {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Confirmar Transferência</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

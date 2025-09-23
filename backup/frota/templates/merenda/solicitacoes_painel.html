@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel de Solicitações de Merenda{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex align-items-center">
+        <h3 class="me-4 mb-0"><i class="bi bi-egg-fried"></i> Merenda Escolar</h3>
+		<a href="{{ url_for('merenda.gerenciar_cardapio') }}" class="btn btn-outline-secondary me-2"><i class="bi bi-calendar-week"></i> Cardápios</a>
+        <a href="{{ url_for('merenda.listar_escolas') }}" class="btn btn-outline-secondary me-2"><i class="bi bi-building"></i> Escolas</a>
+        <a href="{{ url_for('merenda.listar_produtos') }}" class="btn btn-outline-secondary me-2"><i class="bi bi-box-seam"></i> Produtos</a>
+    </div>
+    <div>
+        <a href="{{ url_for('merenda.nova_solicitacao') }}" class="btn btn-primary"><i class="bi bi-plus-circle-fill"></i> Lançar Nova Solicitação</a>
+    </div>
+</div>
+
+<h4>Painel de Solicitações</h4>
+
+<ul class="nav nav-pills mb-3">
+  <li class="nav-item">
+    <a class="nav-link {{ 'active' if status_atual == 'Pendente' }}" href="{{ url_for('merenda.painel_solicitacoes', status='Pendente') }}">Pendentes</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {{ 'active' if status_atual == 'Autorizada' }}" href="{{ url_for('merenda.painel_solicitacoes', status='Autorizada') }}">Autorizadas</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {{ 'active' if status_atual == 'Entregue' }}" href="{{ url_for('merenda.painel_solicitacoes', status='Entregue') }}">Entregues</a>
+  </li>
+   <li class="nav-item">
+    <a class="nav-link {{ 'active' if status_atual == 'Todas' }}" href="{{ url_for('merenda.painel_solicitacoes', status='Todas') }}">Todas</a>
+  </li>
+</ul>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nº Pedido</th>
+                        <th>Escola</th>
+                        <th>Data da Solicitação</th>
+                        <th>Solicitante</th>
+                        <th>Status</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sol in solicitacoes %}
+                    <tr>
+                        <td>#{{ sol.id }}</td>
+                        <td>{{ sol.escola.nome }}</td>
+                        <td>{{ sol.data_solicitacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ sol.solicitante.nome if sol.solicitante else 'N/A' }}</td>
+                        <td>
+                             <span class="badge 
+                                {% if sol.status == 'Pendente' %} bg-warning text-dark
+                                {% elif sol.status == 'Autorizada' %} bg-info text-dark
+                                {% elif sol.status == 'Entregue' %} bg-success
+                                {% else %} bg-secondary {% endif %}">
+                                {{ sol.status }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('merenda.detalhes_solicitacao', solicitacao_id=sol.id) }}" class="btn btn-sm btn-secondary"><i class="bi bi-eye-fill"></i> Ver Detalhes</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">Nenhuma solicitação encontrada com este status.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Servidores{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-people-fill"></i> Servidores Cadastrados</h2>
+    <div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServerModal"><i class="bi bi-person-plus-fill"></i> Adicionar Servidor</button>
+        {% if session.get('role') == 'admin' %}
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importCsvModal"><i class="bi bi-file-earmark-arrow-up-fill"></i> Importar CSV</button>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('lista_servidores') }}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label for="termo" class="form-label">Buscar por Nome, CPF ou Vínculo</label>
+                    <input type="text" class="form-control" id="termo" name="termo" value="{{ request.args.get('termo', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="funcao" class="form-label">Filtrar por Função</label>
+                    <select class="form-select" name="funcao" id="funcao">
+                        <option value="">Todas</option>
+                        {% for f in funcoes_disponiveis %}
+                        <option value="{{ f }}" {% if request.args.get('funcao') == f %}selected{% endif %}>{{ f }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="lotacao" class="form-label">Filtrar por Lotação</label>
+                    <select class="form-select" name="lotacao" id="lotacao">
+                        <option value="">Todas</option>
+                        {% for l in lotacoes_disponiveis %}
+                        <option value="{{ l }}" {% if request.args.get('lotacao') == l %}selected{% endif %}>{{ l }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-info w-100"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Nome do Servidor</th>
+                <th>CPF</th>
+                <th>Função</th>
+                <th>Lotação</th>
+                <th>Vínculo</th>
+                <th class="text-center">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for servidor in servidores %}
+            <tr>
+                <td>
+                    {{ servidor.nome }}
+                    {% set status = status_servidores.get(servidor.cpf) %}
+                    {% if status %}
+                        <span class="badge bg-info ms-2">{{ status }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ servidor.cpf or 'Não informado' }}</td>
+                <td>{{ servidor.funcao or 'Não informado' }}</td>
+                <td>{{ servidor.lotacao or 'Não informado' }}</td>
+                <td>
+                    {% if servidor.tipo_vinculo %}
+                        <span class="badge 
+                            {% if servidor.tipo_vinculo == 'Servidor Efetivo' %} bg-success 
+                            {% elif servidor.tipo_vinculo == 'Comissionado' %} bg-primary
+                            {% elif servidor.tipo_vinculo == 'Terceirizado' %} bg-warning
+                            {% else %} bg-secondary {% endif %}">
+                            {{ servidor.tipo_vinculo }}
+                        </span>
+                    {% else %}
+                        Não informado
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{{ url_for('editar_servidor', id=servidor.num_contrato) }}" class="btn btn-sm btn-secondary" title="Editar e Ver Detalhes"><i class="bi bi-pencil-fill"></i></a>
+                    {% if session.get('role') == 'admin' %}
+                    <a href="{{ url_for('delete_server', id=servidor.num_contrato) }}" class="btn btn-sm btn-danger" title="Excluir" onclick="return confirm('Atenção! Esta ação é irreversível e excluirá todos os dados e documentos associados a este servidor. Deseja continuar?');"><i class="bi bi-trash-fill"></i></a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">Nenhum servidor encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="addServerModal" tabindex="-1" aria-labelledby="addServerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl"> <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addServerModalLabel">Adicionar Novo Servidor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('add_server') }}" method="POST" enctype="multipart/form-data">
+          <div class="modal-body">
+              <h5 class="mb-3 text-muted">Dados Pessoais</h5>
+              <div class="row mb-3">
+                  <div class="col-md-8">
+                      <label for="nome" class="form-label">Nome Completo*</label>
+                      <input type="text" class="form-control" name="nome" required>
+                  </div>
+                   <div class="col-md-4">
+                      <label for="num_contrato" class="form-label">Nº do Vínculo*</label>
+                      <input type="text" class="form-control" name="num_contrato" required>
+                  </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-3"><label for="cpf" class="form-label">CPF</label><input type="text" class="form-control" name="cpf"></div>
+                <div class="col-md-3"><label for="rg" class="form-label">RG</label><input type="text" class="form-control" name="rg"></div>
+                <div class="col-md-3"><label for="data_nascimento" class="form-label">Data de Nascimento</label><input type="date" class="form-control" name="data_nascimento"></div>
+                <div class="col-md-3"><label for="pis_pasep" class="form-label">PIS/PASEP</label><input type="text" class="form-control" name="pis_pasep"></div>
+              </div>
+              <div class="row mb-3">
+                  <div class="col-md-12"><label for="nome_mae" class="form-label">Nome da Mãe</label><input type="text" class="form-control" name="nome_mae"></div>
+              </div>
+              <div class="row mb-3">
+                  <div class="col-md-3"><label for="nacionalidade" class="form-label">Nacionalidade</label><input type="text" class="form-control" name="nacionalidade" value="brasileira"></div>
+                  <div class="col-md-3"><label for="estado_civil" class="form-label">Estado Civil</label><input type="text" class="form-control" name="estado_civil" value="solteiro(a)"></div>
+                  <div class="col-md-3"><label for="telefone" class="form-label">Telefone</label><input type="text" class="form-control" name="telefone"></div>
+                  <div class="col-md-3"><label for="email" class="form-label">E-mail</label><input type="email" class="form-control" name="email"></div>
+              </div>
+              <div class="row mb-3">
+                  <div class="col-md-12"><label for="endereco" class="form-label">Endereço Completo</label><input type="text" class="form-control" name="endereco"></div>
+              </div>
+
+              <hr>
+              <h5 class="mb-3 text-muted">Dados Profissionais e Vínculo</h5>
+              <div class="row mb-3">
+                  <div class="col-md-4"><label for="funcao" class="form-label">Função</label><input type="text" class="form-control" name="funcao"></div>
+                  <div class="col-md-4"><label for="lotacao" class="form-label">Lotação</label><input type="text" class="form-control" name="lotacao"></div>
+                  <div class="col-md-4"><label for="local_trabalho" class="form-label">Local de Trabalho</label><input type="text" class="form-control" name="local_trabalho"></div>
+              </div>
+              <div class="row mb-3">
+                  <div class="col-md-4">
+                      <label for="tipo_vinculo" class="form-label">Vínculo</label>
+                      <select class="form-select" name="tipo_vinculo">
+                          <option value="">-- Selecione --</option>
+                          <option value="Servidor Efetivo">Servidor Efetivo</option>
+                          <option value="Comissionado">Comissionado</option>
+                          <option value="Terceirizado">Terceirizado</option>
+                          <option value="Outros">Outros</option>
+                      </select>
+                  </div>
+                  <div class="col-md-4"><label for="classe_nivel" class="form-label">Classe/Nível</label><input type="text" class="form-control" name="classe_nivel"></div>
+                  <div class="col-md-4"><label for="num_contra_cheque" class="form-label">Nº do Contra Cheque</label><input type="text" class="form-control" name="num_contra_cheque"></div>
+              </div>
+
+              <hr>
+              <h5 class="mb-3 text-muted">Dados Contratuais</h5>
+              <div class="row mb-3">
+                  <div class="col-md-4"><label for="remuneracao" class="form-label">Remuneração (R$)</label><input type="text" class="form-control" name="remuneracao"></div>
+                  <div class="col-md-4"><label for="data_inicio" class="form-label">Data de Início</glabel><input type="date" class="form-control" name="data_inicio"></div>
+                  <div class="col-md-4"><label for="data_saida" class="form-label">Data de Término</label><input type="date" class="form-control" name="data_saida"></div>
+              </div>
+              <div class="row mb-3">
+                  <div class="col-md-12"><label for="dados_bancarios" class="form-label">Dados Bancários</label><input type="text" class="form-control" name="dados_bancarios"></div>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Servidor</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="importCsvModal" tabindex="-1" aria-labelledby="importCsvModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="importCsvModalLabel">Importar Servidores via CSV</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('importar_servidores') }}" method="POST" enctype="multipart/form-data">
+          <div class="modal-body">
+            <p>Selecione um arquivo CSV para importar em massa. Certifique-se de que o arquivo siga o modelo padrão.</p>
+            <div class="mb-3">
+                <label for="csv_file" class="form-label">Arquivo CSV*</label>
+                <input class="form-control" type="file" name="csv_file" id="csv_file" accept=".csv" required>
+            </div>
+            <a href="{{ url_for('baixar_modelo_csv') }}">Baixar modelo de importação (.csv)</a>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-success">Importar Arquivo</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

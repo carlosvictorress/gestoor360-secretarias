@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Produtos da Merenda Escolar{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-box-seam"></i> Produtos da Merenda Escolar</h2>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex align-items-center">
+        <!-- <h3 class="me-4 mb-0"><i class="bi bi-egg-fried"> -->
+        <a href="{{ url_for('merenda.painel_solicitacoes') }}" class="btn btn-outline-secondary me-2"><i class="bi bi-clipboard-check"></i> Solicitações</a>
+        <a href="{{ url_for('merenda.listar_escolas') }}" class="btn btn-outline-secondary me-2"><i class="bi bi-building"></i> Escolas</a>
+    </div>
+    <div>
+        <a href="{{ url_for('merenda.entrada_estoque') }}" class="btn btn-success"><i class="bi bi-box-arrow-in-down"></i> Entrada de Estoque</a>
+        <a href="{{ url_for('merenda.novo_produto') }}" class="btn btn-primary ms-2"><i class="bi bi-plus-circle-fill"></i> Adicionar Produto</a>
+    </div>
+</div>
+
+
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nome do Produto</th>
+                        <th>Categoria</th>
+                        <th>Unidade de Medida</th>
+                        <th class="text-center">Estoque Atual</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for produto in produtos %}
+                    <tr>
+                        <td>{{ produto.nome }}</td>
+                        <td>{{ produto.categoria or 'Não informada' }}</td>
+                        <td>{{ produto.unidade_medida }}</td>
+                        <td class="text-center fw-bold">{{ produto.estoque_atual }} {{ produto.unidade_medida }}</td>
+                        <td class="text-center">
+                            <a href="{{ url_for('merenda.editar_produto', produto_id=produto.id) }}" class="btn btn-sm btn-secondary" title="Editar Produto"><i class="bi bi-pencil-fill"></i> Editar</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhum produto cadastrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

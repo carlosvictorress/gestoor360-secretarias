@@ -1,0 +1,23 @@
+/* Em static/css/splash.css (versão simplificada para o GIF) */
+
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #f8f9fa; 
+}
+
+.splash-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.splash-gif {
+    max-width: 300px; /* Ajuste o tamanho máximo do seu GIF */
+    width: 100%;
+    height: auto;
+}

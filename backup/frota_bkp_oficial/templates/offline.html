@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SysEduca - Offline</title>
+    <!-- Link para o CSS do Bootstrap para manter um visual consistente -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Estilo para centralizar o conteúdo na tela -->
+    <style>
+      body { 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        height: 100vh; 
+        text-align: center; 
+        background-color: #f8f9fa;
+        color: #6c757d;
+      }
+      .container {
+        max-width: 400px;
+      }
+      h1 {
+        font-size: 2.5rem;
+      }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-3">Você está offline</h1>
+        <p class="lead">Parece que não há conexão com a internet no momento. Por favor, verifique sua rede e tente novamente.</p>
+        <p>O aplicativo tentará recarregar automaticamente assim que a conexão for restabelecida.</p>
+    </div>
+</body>
+</html>

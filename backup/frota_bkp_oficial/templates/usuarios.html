@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerenciar Usuários e Secretarias{% endblock %}
+
+{% block content %}
+<h2>Gerenciar Usuários e Secretarias</h2>
+<hr>
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header">
+                <h5><i class="bi bi-people-fill"></i> Usuários do Sistema</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Usuário</th>
+                            <th>Permissão</th>
+                            <th>Secretaria</th>
+                            <th class="text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.username }}</td>
+                            <td><span class="badge bg-secondary">{{ usuario.role|capitalize }}</span></td>
+                            <td>{{ usuario.secretaria.nome if usuario.secretaria else 'N/A' }}</td>
+                            <td class="text-right">
+                                <a href="{{ url_for('editar_usuario', id=usuario.id) }}" class="btn btn-sm btn-secondary" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                                <a href="{{ url_for('delete_usuario', id=usuario.id) }}" class="btn btn-sm btn-danger" title="Excluir" onclick="return confirm('Tem certeza?');"><i class="bi bi-trash-fill"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+     <form action="{{ url_for('add_usuario') }}" method="POST">
+         <h6 class="mb-3">Adicionar Novo Usuário</h6>
+         <div class="row g-2">
+             <div class="col-md-3">
+                 <input type="text" name="username" class="form-control" placeholder="Usuário" required>
+             </div>
+             <div class="col-md-3">
+                 <input type="password" name="password" class="form-control" placeholder="Senha" required>
+             </div>
+             <div class="col-md-3">
+                 <select name="secretaria_id" class="form-select" required>
+                    <option value="" disabled selected>-- Secretaria --</option>
+                    {% for sec in secretarias %}
+                    <option value="{{ sec.id }}">{{ sec.nome }}</option>
+                    {% endfor %}
+                 </select>
+             </div>
+             <div class="col-md-3">
+                 <select name="role" class="form-select" required>
+                     <option value="" disabled selected>-- Permissão --</option>
+                     <option value="admin">Super Admin</option>
+                     <option value="RH">RH</option>
+                     <option value="Combustivel">Combustível</option>
+                     <option value="Merenda Escolar">Merenda Escolar</option>
+                     <option value="Patrimonio">Patrimônio</option>
+                     <option value="operador">Operador (Básico)</option>
+                 </select>
+             </div>
+         </div>
+         <button type="submit" class="btn btn-primary mt-2 w-100">Adicionar Usuário</button>
+     </form>
+</div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header">
+                <h5><i class="bi bi-building"></i> Secretarias Cadastradas</h5>
+            </div>
+            <div class="card-body">
+                {% if secretarias %}
+                <ul class="list-group">
+                    {% for sec in secretarias %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ sec.nome }}
+                        <a href="{{ url_for('delete_secretaria', id=sec.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Tem certeza?');"><i class="bi bi-trash-fill"></i></a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center">Nenhuma secretaria cadastrada.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <form action="{{ url_for('add_secretaria') }}" method="POST">
+                    <div class="input-group">
+                        <input type="text" name="nome" class="form-control" placeholder="Nome da nova secretaria" required>
+                        <button class="btn btn-success" type="submit">Adicionar Secretaria</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

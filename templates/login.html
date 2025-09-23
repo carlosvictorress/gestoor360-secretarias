@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='timbre.jpg') }}" alt="Logo" style="max-width: 250px;">
+                <h3 class="mt-3">Acesso ao Sistema</h3>
+            </div>
+            
+            <div id="loginForm" style="display: none;">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="alert alert-info small">
+                            Secretaria selecionada: <strong id="secretariaDisplay"></strong>
+                        </div>
+                        <form method="POST">
+                            <input type="hidden" name="secretaria" id="secretariaInput">
+
+                            <div class="mb-3">
+                                <label for="usuario" class="form-label">Usuário</label>
+                                <input type="text" class="form-control" id="usuario" name="usuario" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="senha" class="form-label">Senha</label>
+                                <input type="password" class="form-control" id="senha" name="senha" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Entrar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="secretariaModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Seleção de Secretaria</h5>
+            </div>
+            <div class="modal-body">
+                <p>Por favor, selecione a sua secretaria para continuar.</p>
+                <select id="secretariaSelect" class="form-select">
+                    <option value="" selected disabled>-- Escolha uma opção --</option>
+                    {% for sec in secretarias %}
+                    <option value="{{ sec }}">{{ sec }}</option>
+                    {% endfor %}
+                </select>
+                <div id="modalError" class="text-danger small mt-2" style="display: none;">
+                    É necessário selecionar uma secretaria.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmarSecretariaBtn">Confirmar Seleção</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Referências aos elementos
+    const secretariaModalEl = document.getElementById('secretariaModal');
+    const secretariaModal = new bootstrap.Modal(secretariaModalEl);
+    const confirmarBtn = document.getElementById('confirmarSecretariaBtn');
+    const secretariaSelect = document.getElementById('secretariaSelect');
+    const loginForm = document.getElementById('loginForm');
+    const secretariaInput = document.getElementById('secretariaInput');
+    const secretariaDisplay = document.getElementById('secretariaDisplay');
+    const modalError = document.getElementById('modalError');
+
+    // 1. Mostra o modal assim que a página carrega
+    secretariaModal.show();
+
+    // 2. Adiciona o evento de clique no botão de confirmar do modal
+    confirmarBtn.addEventListener('click', function() {
+        const secretariaSelecionada = secretariaSelect.value;
+
+        // 3. Verifica se uma secretaria foi realmente selecionada
+        if (secretariaSelecionada) {
+            modalError.style.display = 'none'; // Esconde o erro
+
+            // 4. Preenche os campos do formulário principal
+            secretariaInput.value = secretariaSelecionada;
+            secretariaDisplay.textContent = secretariaSelecionada;
+
+            // 5. Esconde o modal e mostra o formulário de login
+            secretariaModal.hide();
+            loginForm.style.display = 'block';
+        } else {
+            // Se nada foi selecionado, mostra uma mensagem de erro
+            modalError.style.display = 'block';
+        }
+    });
+});
+</script>
+{% endblock %}

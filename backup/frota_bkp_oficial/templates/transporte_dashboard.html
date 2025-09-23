@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard do Transporte Escolar{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-bus-front-fill"></i> Módulo de Transporte Escolar</h2>
+    <div>
+        <!-- Botões para funcionalidades futuras -->
+        <a href="{{ url_for('transporte.nova_rota') }}" class="btn btn-primary"><i class="bi bi-plus-circle-fill"></i> Nova Rota</a>
+        <a href="#" class="btn btn-info"><i class="bi bi-person-plus-fill"></i> Adicionar Aluno</a>
+         
+
+	
+	</div>
+</div>
+
+<!-- Cards com os dados que buscamos no Passo 2 -->
+<div class="row g-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-white bg-primary shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-sign-turn-right-fill fs-1"></i>
+                <h3 class="card-title mt-2">{{ total_rotas }}</h3>
+                <p class="card-text">Rotas Cadastradas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-white bg-success shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-people-fill fs-1"></i>
+                <h3 class="card-title mt-2">{{ total_alunos }}</h3>
+                <p class="card-text">Alunos Transportados</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card text-white bg-info shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-person-badge-fill fs-1"></i>
+                <h3 class="card-title mt-2">{{ total_motoristas }}</h3>
+                <p class="card-text">Motoristas Ativos</p>
+            </div>
+        </div>
+    </div>	
+    <div class="col-md-6 col-lg-3">
+        <div class="card bg-light shadow-sm h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-brightness-high-fill fs-2 text-warning"></i>
+                <p class="mb-0"><b>{{ alunos_manha }}</b> Alunos (Manhã)</p>
+                <hr class="my-1">
+                <i class="bi bi-brightness-alt-high-fill fs-2 text-primary"></i>
+                <p class="mb-0"><b>{{ alunos_tarde }}</b> Alunos (Tarde)</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="text-center mt-5">
+    <a href="{{ url_for('transporte.listar_rotas') }}" class="btn btn-lg btn-outline-primary">
+        <i class="bi bi-table"></i> Ver Todas as Rotas
+    </a>
+</div>
+{% endblock %}

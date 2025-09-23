@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Motoristas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-person-video3"></i> Motoristas</h2>
+    <a href="{{ url_for('motoristas.novo') }}" class="btn btn-primary"><i class="bi bi-person-plus-fill"></i> Adicionar Novo Motorista</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nome do Motorista</th>
+                        <th class="text-center">Vínculo</th>
+                        <th class="text-center">Secretaria</th>
+                        <th class="text-center">Validade da CNH</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for motorista in motoristas %}
+                    <tr>
+                        <td>{{ motorista.nome }}</td>
+                        <td class="text-center">{{ motorista.tipo_vinculo or 'N/A' }}</td>
+                        <td class="text-center">{{ motorista.secretaria or 'N/A' }}</td>
+                        <td class="text-center">
+                            {% if motorista.cnh_validade %}
+                                {% set dias_para_vencer = (motorista.cnh_validade - hoje).days %}
+                                <span class="badge 
+                                    {% if dias_para_vencer < 0 %} bg-danger
+                                    {% elif dias_para_vencer <= 30 %} bg-warning text-dark
+                                    {% else %} bg-success {% endif %}">
+                                    {{ motorista.cnh_validade.strftime('%d/%m/%Y') }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">Não informada</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                             <a href="{{ url_for('motoristas.detalhes', motorista_id=motorista.id) }}" class="btn btn-sm btn-secondary">
+                                <i class="bi bi-pencil-fill"></i> Editar e Ver Documentos
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhum motorista cadastrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

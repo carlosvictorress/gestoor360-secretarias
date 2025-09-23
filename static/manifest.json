@@ -1,0 +1,21 @@
+{
+  "name": "SysEduca - Lançar Combustível",
+  "short_name": "Combustível",
+  "start_url": "/lancar_abastecimento",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#004d40",
+  "description": "Aplicativo para lançamento rápido de abastecimentos.",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

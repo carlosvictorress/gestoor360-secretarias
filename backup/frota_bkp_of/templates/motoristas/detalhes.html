@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes: {{ motorista.nome }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-person-lines-fill"></i> Detalhes do Motorista</h2>
+    <a href="{{ url_for('motoristas.listar') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar para a Lista</a>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <form method="POST">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5>Editar Dados Cadastrais</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-muted">Informações Profissionais</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de Vínculo*</label>
+                            <select class="form-select" name="tipo_vinculo" required>
+                                <option value="Efetivo" {% if motorista.tipo_vinculo == 'Efetivo' %}selected{% endif %}>Efetivo</option>
+                                <option value="Contratado" {% if motorista.tipo_vinculo == 'Contratado' %}selected{% endif %}>Contratado</option>
+                                <option value="Terceirizado" {% if motorista.tipo_vinculo == 'Terceirizado' %}selected{% endif %}>Terceirizado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Secretaria*</label>
+                            <select class="form-select" name="secretaria" required>
+                                <option value="Secretaria de Educação" {% if motorista.secretaria == 'Secretaria de Educação' %}selected{% endif %}>Secretaria de Educação</option>
+                                <option value="Secretaria de Saúde" {% if motorista.secretaria == 'Secretaria de Saúde' %}selected{% endif %}>Secretaria de Saúde</option>
+                                <option value="Secretaria de Obras" {% if motorista.secretaria == 'Secretaria de Obras' %}selected{% endif %}>Secretaria de Obras</option>
+                                <option value="Secretaria de Administração" {% if motorista.secretaria == 'Secretaria de Administração' %}selected{% endif %}>Secretaria de Administração</option>
+                                <option value="Secretaria de Finanças" {% if motorista.secretaria == 'Secretaria de Finanças' %}selected{% endif %}>Secretaria de Finanças</option>
+                                <option value="Gabinete do Prefeito" {% if motorista.secretaria == 'Gabinete do Prefeito' %}selected{% endif %}>Gabinete do Prefeito</option>
+                                <option value="Outro" {% if motorista.secretaria == 'Outro' %}selected{% endif %}>Outro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h6 class="text-muted">Dados Pessoais</h6>
+                    <div class="row mb-2">
+                        <div class="col-md-12"><label class="form-label">Nome Completo*</label><input type="text" class="form-control" name="nome" value="{{ motorista.nome }}" required></div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6"><label class="form-label">RG</label><input type="text" class="form-control" name="rg" value="{{ motorista.rg or '' }}"></div>
+                        <div class="col-md-6"><label class="form-label">CPF</label><input type="text" class="form-control" name="cpf" value="{{ motorista.cpf or '' }}"></div>
+                    </div>
+                     <div class="row mb-3">
+                        <div class="col-md-7"><label class="form-label">Endereço</label><input type="text" class="form-control" name="endereco" value="{{ motorista.endereco or '' }}"></div>
+                        <div class="col-md-5"><label class="form-label">Telefone</label><input type="text" class="form-control" name="telefone" value="{{ motorista.telefone or '' }}"></div>
+                    </div>
+
+                    <hr>
+                    <h6 class="text-muted">Documentação e Veículo</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-4"><label class="form-label">Nº da CNH</label><input type="text" class="form-control" name="cnh_numero" value="{{ motorista.cnh_numero or '' }}"></div>
+                        <div class="col-md-4"><label class="form-label">Categoria CNH</label><input type="text" class="form-control" name="cnh_categoria" value="{{ motorista.cnh_categoria or '' }}"></div>
+                        <div class="col-md-4"><label class="form-label">Validade da CNH</label><input type="date" class="form-control" name="cnh_validade" value="{{ motorista.cnh_validade.strftime('%Y-%m-%d') if motorista.cnh_validade else '' }}"></div>
+                    </div>
+                     <div class="row mb-3">
+                        <div class="col-md-8"><label class="form-label">Modelo do Veículo</label><input type="text" class="form-control" name="veiculo_modelo" value="{{ motorista.veiculo_modelo or '' }}"></div>
+                        <div class="col-md-2"><label class="form-label">Ano</label><input type="number" class="form-control" name="veiculo_ano" value="{{ motorista.veiculo_ano or '' }}"></div>
+                        <div class="col-md-2"><label class="form-label">Placa</label><input type="text" class="form-control" name="veiculo_placa" value="{{ motorista.veiculo_placa or '' }}"></div>
+                    </div>
+                    <hr>
+                     <h6 class="text-muted">Informações da Rota</h6>
+                     <div class="row mb-3">
+                        <div class="col-md-8"><label class="form-label">Descrição da Rota</label><input type="text" class="form-control" name="rota_descricao" value="{{ motorista.rota_descricao or '' }}"></div>
+                        <div class="col-md-4">
+                            <label class="form-label">Turno</label>
+                            <select class="form-select" name="turno">
+                                <option value="Manhã" {% if motorista.turno == 'Manhã' %}selected{% endif %}>Manhã</option>
+                                <option value="Tarde" {% if motorista.turno == 'Tarde' %}selected{% endif %}>Tarde</option>
+                                <option value="Noite" {% if motorista.turno == 'Noite' %}selected{% endif %}>Noite</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-end align-items-center">
+                    <a href="{{ url_for('motoristas.excluir', motorista_id=motorista.id) }}" 
+                       class="btn btn-danger me-auto" 
+                       onclick="return confirm('ATENÇÃO: Esta ação é irreversível e irá apagar todos os documentos anexados. Deseja continuar?');">
+                       <i class="bi bi-trash-fill"></i> Excluir Motorista
+                    </a>
+                    
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save-fill"></i> Salvar Alterações</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5><i class="bi bi-paperclip"></i> Gerenciar Documentos</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('motoristas.upload_documento', motorista_id=motorista.id) }}" method="POST" enctype="multipart/form-data">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo de Documento*</label>
+                            <select class="form-select" name="tipo_documento" required>
+                                <option value="">-- Selecione o tipo --</option>
+                                <option value="RG">RG</option>
+                                <option value="CPF">CPF</option>
+                                <option value="CNH">CNH</option>
+                                <option value="ALVARA DE FUNCIONAMENTO">Alvará de Funcionamento</option>
+                                <option value="CERTIFICADO DE TACOGRAFO">Certificado de Tacógrafo</option>
+                                <option value="CURSO DE TRANSPORTE ESCOLAR">Curso de Transporte Escolar</option>
+                                <option value="DOCUMENTO DO VEICULO">Documento do Veículo</option>
+                                <option value="OUTRO">Outro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Arquivo*</label>
+                            <input type="file" class="form-control" name="documento" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 mt-3"><i class="bi bi-upload"></i> Anexar Documento</button>
+                </form>
+            </div>
+            <div class="card-footer">
+                <h6>Documentos Anexados</h6>
+                {% if motorista.documentos %}
+                <ul class="list-group list-group-flush">
+                    {% for doc in motorista.documentos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div><i class="bi bi-file-earmark-text"></i> {{ doc.tipo_documento }}</div>
+                        <div>
+                            <a href="{{ url_for('motoristas.download_documento', doc_id=doc.id) }}" class="btn btn-sm btn-info" title="Baixar"><i class="bi bi-download"></i></a>
+                            <a href="{{ url_for('motoristas.excluir_documento', doc_id=doc.id) }}" class="btn btn-sm btn-danger" title="Excluir" onclick="return confirm('Tem certeza?');"><i class="bi bi-trash-fill"></i></a>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center mb-0">Nenhum documento anexado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
