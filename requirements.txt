@@ -6,3 +6,4 @@ Flask-Bcrypt
 gunicorn
 psycopg2-binary
 qrcode[pil]
+psycopg2-binary

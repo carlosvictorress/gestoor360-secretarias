@@ -55,7 +55,15 @@ database_url = os.environ.get("DATABASE_URL")
 if database_url:
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = database_url or "sqlite:///" + os.path.join(basedir, "servidores.db") + "?timeout=30"
+db_user = 'syseduca_user'
+db_pass = '@@CVtorres123321@'
+db_name = 'syseduca_db'
+db_host = 'localhost' # O banco está no mesmo servidor que a aplicação
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_pass}@{db_host}/{db_name}'
+# ----------------------------------------------
+
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "uma-chave-secreta-muito-dificil-de-adivinhar"
 app.config["UPLOAD_FOLDER"] = "uploads"
