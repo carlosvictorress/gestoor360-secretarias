@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from flask import current_app, make_response # Adicionado make_response
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from functools import wraps
-from app import db
+from extensions import db
 from models import Protocolo, Tramitacao, Anexo
 from datetime import datetime
 # Importações para gerar o PDF
