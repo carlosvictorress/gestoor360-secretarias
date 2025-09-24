@@ -1784,15 +1784,15 @@ def debug_sessao():
 # ===================================================================
 # PARTE 6: Importação e Registro dos Blueprints
 # ===================================================================
-from .patrimonio_routes import patrimonio_bp
-from .merenda_routes import merenda_bp
-from .motoristas_routes import motoristas_bp
-from .escola_routes import escola_bp
-from .transporte_routes import transporte_bp
-from .protocolo_routes import protocolo_bp
-from .contratos_routes import contratos_bp
-from .frequencia_routes import frequencia_bp
-from .backup_routes import backup_bp
+from patrimonio_routes import patrimonio_bp
+from merenda_routes import merenda_bp
+from motoristas_routes import motoristas_bp
+from escola_routes import escola_bp
+from transporte_routes import transporte_bp
+from protocolo_routes import protocolo_bp
+from contratos_routes import contratos_bp
+from frequencia_routes import frequencia_bp
+from backup_routes import backup_bp
 
 app.register_blueprint(transporte_bp)
 app.register_blueprint(protocolo_bp)
