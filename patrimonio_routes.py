@@ -1,11 +1,12 @@
 # patrimonio_routes.py
-from .utils import role_required
+from utils import role_required
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from .app import db
-from .models import Patrimonio, MovimentacaoPatrimonio, Servidor
-from .utils import login_required, registrar_log # LINHA CORRIGIDA
+from app import db
+from models import Patrimonio, MovimentacaoPatrimonio, Servidor
+from utils import login_required, registrar_log # LINHA CORRIGIDA
 from sqlalchemy import or_
 from datetime import datetime
+from extensions import db
 
 patrimonio_bp = Blueprint('patrimonio', __name__, url_prefix='/patrimonio')
 

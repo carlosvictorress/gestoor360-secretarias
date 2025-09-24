@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from .extensions import db
-from .models import Escola
-from .utils import login_required, admin_required # Protege as rotas
-from .utils import role_required
+from extensions import db
+from models import Escola
+from utils import login_required, admin_required # Protege as rotas
+from utils import role_required
 
 escola_bp = Blueprint('escola', __name__)
 

@@ -15,3 +15,6 @@ servidores.db
 
 # Arquivos de upload dos usuários
 /uploads/
+
+# Ignorar arquivos de texto com senhas ou tokens
+*.txt

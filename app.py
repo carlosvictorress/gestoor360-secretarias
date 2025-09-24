@@ -1,6 +1,7 @@
 # ===================================================================
 # PARTE 1: Importações de Bibliotecas
 # ===================================================================
+import sys 
 import os
 import io
 import csv
@@ -36,6 +37,8 @@ from reportlab.pdfgen import canvas as canvas_lib
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
 from reportlab.lib.units import cm, inch
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Configura o locale para o português do Brasil
 try:
@@ -83,7 +86,7 @@ bcrypt = Bcrypt(app)
 # ===================================================================
 # PARTE 3: Importação dos Modelos
 # ===================================================================
-from .models import *
+from models import *
 
 
 # ===================================================================
