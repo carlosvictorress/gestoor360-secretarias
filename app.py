@@ -56,15 +56,15 @@ if database_url:
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
 # --- Deixe a configuração do PostgreSQL comentada para uso local ---
-# db_user = 'syseduca_user'
-# db_pass = 'sua_senha_muito_forte_que_voce_anotou'
-# db_name = 'syseduca_db'
-# db_host = 'localhost' 
-# app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_pass}@{db_host}/{db_name}'
+db_user = 'syseduca_user'
+db_pass = 'sua_senha_muito_forte_que_voce_anotou'
+db_name = 'syseduca_db'
+db_host = 'localhost' 
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{db_user}:{db_pass}@{db_host}/{db_name}'
 
 # --- Use esta configuração para desenvolver no seu PC ---
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'servidores.db')
+# basedir = os.path.abspath(os.path.dirname(__file__))
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'servidores.db')
 # --------------------------------------------------------
 
 

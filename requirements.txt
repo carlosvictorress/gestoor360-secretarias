@@ -1,10 +1,14 @@
 alembic==1.16.5
 bcrypt==4.3.0
 blinker==1.9.0
+HEAD
+charset-normalizer==3.4.3
+click==8.3.0
 certifi==2025.8.3
 charset-normalizer==3.4.3
 click==8.3.0
 colorama==0.4.6
+dd90954094e9cadb61d7d7caa8712fc9c23e4700
 docopt==0.6.2
 Flask==3.1.2
 Flask-Bcrypt==1.0.1
@@ -12,7 +16,9 @@ Flask-Migrate==4.1.0
 Flask-SQLAlchemy==3.1.1
 greenlet==3.2.4
 gunicorn==23.0.0
+HEAD
 idna==3.10
+dd90954094e9cadb61d7d7caa8712fc9c23e4700
 itsdangerous==2.2.0
 Jinja2==3.1.6
 Mako==1.3.10
@@ -23,8 +29,12 @@ pillow==11.3.0
 psycopg2-binary==2.9.10
 qrcode==8.2
 reportlab==4.4.4
+HEAD
+SQLAlchemy==2.0.43
+typing_extensions==4.15.0
 requests==2.32.5
 SQLAlchemy==2.0.43
 typing_extensions==4.15.0
 urllib3==2.5.0
+dd90954094e9cadb61d7d7caa8712fc9c23e4700
 Werkzeug==3.1.3
